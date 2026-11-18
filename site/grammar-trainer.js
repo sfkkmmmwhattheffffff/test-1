@@ -3,9 +3,33 @@ const grammarAnswer = (value, id) => {
  return id==='11-10'?clean:clean.toLowerCase();
 };
 
+let grammarBookUrl='';
+
+function grammarBookPicker(){
+ return `<label class="button light grammar-book-picker">
+  <span>${grammarBookUrl?tr('Заменить PDF учебника','Replace textbook PDF'):tr('Открыть PDF учебника','Open textbook PDF')}</span>
+  <input class="grammar-book-input" type="file" accept="application/pdf,.pdf">
+ </label>`;
+}
+
+function bindGrammarBookPicker(root,onLoad){
+ const input=root.querySelector('.grammar-book-input');
+ input.onchange=()=>{
+  const file=input.files[0];
+  if(!file)return;
+  if(grammarBookUrl)URL.revokeObjectURL(grammarBookUrl);
+  grammarBookUrl=URL.createObjectURL(file);
+  onLoad();
+ };
+}
+
 function grammarTrainerPage(){
  const host=$('#secondary-view');
  host.innerHTML=`
+  <div class="grammar-book-tools">
+   ${grammarBookPicker()}
+   <p class="feature-note">${tr('Выбери PDF Fundamentals of English Grammar, 4-е издание. Оригинальные таблицы откроются на нужных страницах. Файл читается в браузере.','Select Fundamentals of English Grammar, 4th edition. Original charts open at the relevant page. The file is read in your browser.')}</p>
+  </div>
   <label class="search-label" for="grammar-search">${tr('Найти грамматическую тему','Find a grammar topic')}</label>
   <input class="search-input" id="grammar-search" type="search" placeholder="${tr('Например: Present Perfect или артикли','For example: Present Perfect or articles')}">
   <p class="feature-note" id="grammar-count" role="status"></p>
@@ -39,34 +63,101 @@ function grammarTrainerPage(){
    renderGrammarLesson(lesson);
   });
  }
+ bindGrammarBookPicker(host,()=>{
+  host.querySelector('.grammar-book-picker span').textContent=tr('PDF учебника открыт','Textbook PDF loaded');
+ });
  search.oninput=catalogue;
  catalogue();
 }
 
-function renderGrammarLesson(lesson){
+function grammarLessonView(lesson,body){
  const exercise=$('#exercise');
  $('#trainer').classList.remove('wide-trainer');
  $('#session-label').textContent=tr('ГРАММАТИКА','GRAMMAR')+' · '+lesson.id;
  $('#session-progress').style.width='0%';
  session={mode:'grammar-course'};
- exercise.innerHTML=`
-  <article class="grammar-lesson">
-   <h2 tabindex="-1">${esc(lesson.title)}</h2>
-   <p class="source-note">${tr('Таблица','Chart')} ${lesson.id} · ${tr('с.','p.')} ${lesson.page}</p>
-   <h3>${tr('Теория','Theory')}</h3>
-   <p lang="ru" data-no-translate>${esc(lesson.theory)}</p>
-   <h3>${tr('Практика','Practice')}</h3>
-   <form id="grammar-form">
-    ${lesson.questions.map((question,index)=>`<div class="grammar-question">
-     <label for="grammar-answer-${index}" lang="en" data-no-translate>${esc(question.prompt)}</label>
-     ${question.reference?`<small lang="ru">${esc(question.reference)}</small>`:''}
-     <input class="search-input" id="grammar-answer-${index}" name="answer-${index}" lang="en" spellcheck="false" autocomplete="off" required>
-     <p class="grammar-feedback" aria-live="polite"></p>
-    </div>`).join('')}
-    <button type="submit" class="button dark">${tr('Проверить','Check')}</button>
-   </form>
-   <div id="grammar-result" aria-live="polite"></div>
-  </article>`;
+ exercise.innerHTML=`<article class="grammar-lesson">
+  <button type="button" class="button light grammar-fullscreen" aria-pressed="false"></button>
+  ${body}
+ </article>`;
+ if(!$('#trainer').open)$('#trainer').showModal();
+ const button=exercise.querySelector('.grammar-fullscreen');
+ function sync(){
+  const on=$('#trainer').classList.contains('grammar-expanded');
+  button.textContent=on?tr('Выйти из полноэкранного режима','Exit full screen'):tr('На весь экран','Full screen');
+  button.setAttribute('aria-pressed',String(on));
+ }
+ button.onclick=()=>{
+  $('#trainer').classList.toggle('grammar-expanded');
+  sync();
+ };
+ sync();
+ exercise.querySelector('h2').focus();
+ return exercise;
+}
+
+document.getElementById('trainer').addEventListener('close',event=>event.currentTarget.classList.remove('grammar-expanded'));
+
+function renderGrammarLesson(lesson){
+ const pdfPage=Number(lesson.page)+13;
+ const title=tr('Оригинал учебника','Original textbook')+' · '+tr('с. ','p. ')+lesson.page;
+ const pdfUrl=grammarBookUrl&&grammarBookUrl+'#page='+pdfPage;
+ const exercise=grammarLessonView(lesson,`
+  <h2 tabindex="-1">${esc(lesson.title)}</h2>
+  <h3>${tr('Теория','Theory')}</h3>
+  <p class="source-note">${tr('Таблица','Chart')} ${lesson.id} · ${tr('с.','p.')} ${lesson.page}</p>
+  ${pdfUrl?`<p><a href="${esc(pdfUrl)}" target="_blank" rel="noopener">${esc(title)} ↗</a></p>
+   <iframe class="grammar-book-frame" title="${esc(title)}" src="${esc(pdfUrl)}"></iframe>`:`
+   <p>${tr('Открой PDF, чтобы прочитать полное объяснение и примеры в оригинале.','Open the PDF to read the complete explanation and original examples.')}</p>
+   ${grammarBookPicker()}`}
+  <h3>${tr('Краткий конспект','Summary')}</h3>
+  <p lang="ru" data-no-translate>${esc(lesson.theory)}</p>
+  <h3>${tr('Пример в контексте','Example in context')}</h3>
+  <p class="grammar-context" lang="en" data-no-translate>${esc(lesson.context)}</p>
+  <button type="button" class="button dark" id="grammar-train" aria-expanded="false" aria-controls="grammar-practice-menu">${tr('Тренировать','Practise')}</button>
+  <div id="grammar-practice-menu" class="grammar-practice-menu" hidden></div>`);
+ if(!pdfUrl)bindGrammarBookPicker(exercise,()=>renderGrammarLesson(lesson));
+ const train=$('#grammar-train'), menu=$('#grammar-practice-menu');
+ train.onclick=()=>{
+  if(!menu.hidden){
+   menu.hidden=true;
+   train.setAttribute('aria-expanded','false');
+   return;
+  }
+  menu.innerHTML=`<button type="button" class="button light" data-grammar-practice="all">${tr('Все задания блока','All exercises in this block')} · ${lesson.questions.length}</button>
+   ${lesson.questions.map((question,index)=>`<button type="button" class="trainer-choice" data-grammar-practice="${index}">
+    <span class="trainer-choice-body"><strong>${tr('Задание','Exercise')} ${index+1}</strong><span lang="en" data-no-translate>${esc(question.prompt)}</span>
+    ${question.reference?`<small>${esc(question.reference)}</small>`:''}</span><span aria-hidden="true">→</span>
+   </button>`).join('')}`;
+  menu.querySelectorAll('[data-grammar-practice]').forEach(button=>button.onclick=()=>{
+   const selected=button.dataset.grammarPractice;
+   renderGrammarPractice(lesson,selected==='all'?null:Number(selected));
+  });
+  menu.hidden=false;
+  train.setAttribute('aria-expanded','true');
+  menu.querySelector('button').focus();
+ };
+}
+
+function renderGrammarPractice(lesson,selected){
+ const questions=selected===null?lesson.questions:[lesson.questions[selected]];
+ grammarLessonView(lesson,`
+  <button type="button" class="text-button" id="grammar-theory-back">${tr('← К теории и выбору заданий','← Back to theory and exercises')}</button>
+  <h2 tabindex="-1">${esc(lesson.title)}</h2>
+  <form id="grammar-form">
+   ${questions.map((question,index)=>`<div class="grammar-question">
+    <small>${tr('Задание','Exercise')} ${(selected??index)+1}${question.reference?' · '+esc(question.reference):''}</small>
+    <label for="grammar-answer-${index}" lang="en" data-no-translate>${esc(question.prompt)}</label>
+    <input class="search-input" id="grammar-answer-${index}" name="answer-${index}" lang="en" spellcheck="false" autocomplete="off" required>
+    <p class="grammar-feedback" aria-live="polite"></p>
+   </div>`).join('')}
+   <button type="submit" class="button dark">${tr('Проверить','Check')}</button>
+  </form>
+  <div id="grammar-result" aria-live="polite"></div>`);
+ $('#grammar-theory-back').onclick=()=>{
+  renderGrammarLesson(lesson);
+  $('#grammar-train').click();
+ };
  const form=$('#grammar-form');
  form.onsubmit=event=>{
   event.preventDefault();
@@ -75,7 +166,7 @@ function renderGrammarLesson(lesson){
   if(empty){empty.value='';empty.reportValidity();return}
   let score=0;
   for(const [index,input] of inputs.entries()){
-   const question=lesson.questions[index];
+   const question=questions[index];
    const correct=question.answers.some(answer=>grammarAnswer(answer,lesson.id)===grammarAnswer(input.value,lesson.id));
    if(correct)score++;
    input.disabled=true;
@@ -87,8 +178,6 @@ function renderGrammarLesson(lesson){
   $('#session-progress').style.width='100%';
   $('#grammar-result').innerHTML=`<p>${tr('Верных ответов: ','Correct answers: ')}${score} / ${inputs.length}</p>
    <button type="button" class="button light" id="grammar-retry">${tr('Попробовать ещё раз','Try again')}</button>`;
-  $('#grammar-retry').onclick=()=>renderGrammarLesson(lesson);
+  $('#grammar-retry').onclick=()=>renderGrammarPractice(lesson,selected);
  };
- if(!$('#trainer').open)$('#trainer').showModal();
- exercise.querySelector('h2').focus();
 }

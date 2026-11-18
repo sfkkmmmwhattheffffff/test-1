@@ -103,3 +103,14 @@ dialog{border:1px solid #e7e7e4;border-radius:8px;padding:24px;width:min(560px,c
 .grammar-question .wrong { border-color: #ba3939; }
 .grammar-feedback:empty { display: none; }
 #grammar-result { margin-top: .75rem; }
+
+.grammar-book-tools { margin-bottom: 1.25rem; }
+.grammar-book-picker { position: relative; display: inline-flex; width: fit-content; max-width: 100%; cursor: pointer; }
+.grammar-book-input { position: absolute; inset: 0; width: 100%; opacity: 0; cursor: pointer; }
+.grammar-book-picker:focus-within { outline: 2px solid currentColor; outline-offset: 2px; }
+.grammar-book-frame { display: block; border: 1px solid var(--line); width: 100%; height: 55dvh; margin-top: .75rem; }
+.grammar-context { border-inline-start: 2px solid var(--line); padding-inline-start: .75rem; }
+.grammar-practice-menu:not([hidden]) { display: grid; gap: .5rem; margin-top: .75rem; }
+.grammar-fullscreen { margin-block: .5rem 1rem; }
+#trainer.grammar-expanded { inset: 0; margin: 0; width: 100%; max-width: none; height: 100dvh; max-height: none; border-radius: 0; }
+#trainer.grammar-expanded :is(.modal-head,.session-track,#exercise) { width: 100%; max-width: 65rem; margin-inline: auto; }

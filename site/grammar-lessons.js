@@ -241,3 +241,165 @@ for(const line of grammarSource.trim().split('\n')){
   });
  }
 }
+
+/* Worked examples, in chart order. Context precedes the target form. */
+const grammarContexts = [
+`You call Emma at breakfast. She usually takes the bus, but today she is walking to school.
+A neighbour asks about Max's routine: Does Max walk to work? No, he doesn't.
+You're planning a Saturday meeting. Nina is usually free in the morning, but she never works on Saturdays.
+Two colleagues share a desk. Anna works on Monday; Anna and Lee work together on Tuesday.
+The library closes at six. Ben studies there after school, and his sister watches the clock.
+You're holding the wrong bag. I know whose bag this is: it belongs to Lara.
+A friend checks whether the shop is open: Is it open today? Yes, it is.`,
+`You missed the call yesterday. Did Sam leave a message? No, he didn't leave one.
+You left the village yesterday and you are arriving in town now: arrive → arrived / arriving.
+Nora went home early yesterday. Today she has gone to the library instead.
+The forecast changed. I took an umbrella this morning, but I've left it at work.
+The team waited, walked and played. The endings sound different: waited /ɪd/, walked /t/, played /d/.
+We were walking home when a taxi stopped beside us.
+Before I left the flat, I checked that the windows were shut.
+Our street has changed. There used to be a bakery here, but it closed last winter.`,
+`The sky looks black. It's going to rain, so I'll bring the washing inside.
+A friend asks about your summer plans: Are you going to travel? I'm not going to leave the country.
+A friend needs a lift. I'll pick you up at six. Will you be ready then?
+There is traffic near the bridge. We'll probably be late, but we might still catch the train.
+We planned to cook. The phone is ringing, though, so I'll answer it first.
+If the rain stops, we'll walk to the station. I'll call you as soon as we arrive.
+We booked a table yesterday. We're meeting Rosa there at seven.
+The last ferry leaves at 9:10, according to the timetable.
+Hurry to the platform: the train is about to leave.
+When we arrive, we'll check in, unpack and go out for dinner.`,
+`The glass is on the floor in pieces. Someone has broken it.
+Sam moved here in May. He has lived here since May, so he has lived here for several months.
+Has Lina handed in her essay yet? No, she hasn't submitted it.
+You sit down for dinner. I've already eaten, but I can keep you company.
+I visited York in 2022. My brother has never visited York.
+The kitchen smells wonderful. Dad has been baking bread all morning.
+I've written three pages so far. I've been writing since breakfast.
+I arrived at eight, but the café had already closed at seven.`,
+`You check tomorrow's plans with Rosa: Can you come at six? Yes, I can.
+Your friend lost a glove. Where did you last see it?
+Your classmate looks tired. How come you're so tired? — I worked late.
+You find a broken lamp. Who broke it? — Mia. Who did she tell? — Her dad.
+At a party someone asks, What do you do? — I'm a nurse. Later: What are you doing? — Making tea.
+The shop has two blue coats. Which one fits better? What kind of coat do you need?
+A notebook is on the floor. Whose notebook is this? — It's Sam's.
+You want directions to a village. How do I get there? — Take the train.
+A coach asks: How often do you swim? — Twice a week.
+You're checking whether to walk. How far is it to the park? — About a kilometre.
+You have an hour free. How long does it take to get to the museum? — Twenty minutes.
+A tourist asks, Where's the station? On a formal worksheet, the same question reads Where is the station?
+You need seats for a meeting. How many people are coming, and how much time do we have?
+It's raining. How about staying in and watching a film?
+You're checking a booking: We booked a table for six, didn't we?`,
+`One child arrives early; three more children arrive together.
+A market stall sells cups /s/, bags /z/ and dishes /ɪz/.
+At the entrance, Dan showed his ticket. Dan is the subject; his ticket is the object.
+Mia is waiting outside. Can I sit next to her when she comes in?
+Our club meets at six on Friday in June.
+We met at the library yesterday. Yesterday, we met at the library also works.
+The key to the upstairs rooms is at reception.
+It's cold outside, so put on two warm layers before you leave.
+I returned my library book before going to the bookshop.
+Lina saw us at the bus stop, and we waved to her.
+The coach put the players' bags beside the children's coats.
+Your umbrella is by the door. The green one is mine.
+Nora cut herself while preparing dinner.
+Two buses stop here. One goes to town; the other goes to the airport. We can wait for another bus.
+I packed some books. The others are still on the shelf.
+Some students walk to school; others cycle. The other routes are too long.`,
+`The road is closed. We must turn back, and we should call the others.
+Leo could skate at five, but he can't skate today because his ankle hurts.
+You hear a knock. Maybe it's the courier. — May I open the door?
+The train hasn't arrived. It could be delayed by the snow.
+You enter a meeting late. May I sit here?
+Your hands are full. Could you hold the door for me, please?
+It's cold outside. You should wear a coat, and you ought to take a hat.
+The flight leaves early. You'd better not oversleep.
+We must show our passes today. Yesterday we had to show our passports.
+You don't have to bring a laptop, but you must not use your phone during the exam.
+It's midnight and the light is still on. She must be working late.
+Your brother can help us, can't he?
+Before the lesson, open your books. Don't write on this page.
+We're tired. Let's take a break. Why don't we get some water?
+I prefer tea to coffee, but I'd rather have water right now.`,
+`Lara opened her notebook and wrote the address.
+We can wait here or take a taxi, but the taxi will cost more.
+The last bus had left, so we walked home.
+I can't visit on Friday, but Sam can.
+I love cycling, and so does Ella. I don't like running, and she doesn't either.
+We packed an extra jacket because the forecast predicted snow.
+Although the restaurant was crowded, we found a table near the window.`,
+`The two suitcases weigh ten kilos each. This one is as heavy as that one.
+The blue route is shorter than the red one. The green route is the shortest of the three.
+This bus is faster than the tram, but the train is the most reliable.
+I leave early, but Ella leaves earlier than I do.
+We moved upstairs. The new room is slightly larger, and it is much brighter.
+The bus costs less than the train, but it is not as fast.
+More people came this year, so we needed more space.
+As the storm moved closer, the wind got stronger and stronger.
+The more we practise the dialogue, the easier it becomes.
+This is the busiest day of the week and one of the busiest mornings of the year.
+Their bikes look alike. Yours is similar to mine, but its brakes are different from mine.`,
+`A storm damaged the roof. The roof was damaged during the night.
+The library has been closed for repairs, but the windows are being replaced now.
+The bus arrived at noon. The passengers were met by their guide.
+The mural was painted by local schoolchildren.
+These forms must be signed before you can collect a pass.
+The window is locked, so you can't open it without a key.
+The journey was tiring. By the time we arrived, everyone was tired.
+Bring a jacket: it gets cold after sunset, and you might get soaked.
+I moved next to a station. I'm getting used to hearing trains at night.
+I used to work nights. Now I'm used to getting up at six.
+We're supposed to return the keys by ten, according to the rental agreement.`,
+`At the station we waited an hour and bought a ticket for a university tour.
+I need a chair and some furniture for the new room.
+The teacher gave us some advice, then set a short homework task.
+I packed my luggage and checked that the camera equipment was safe.
+We still have a few apples and a little milk for breakfast.
+Would you like some coffee? — Yes, two coffees, please.
+Could you buy two loaves of bread and a litre of milk?
+I found a key near the gate. The key opened the garden shed.
+We flew to Scotland and stayed near the River Tay.
+Our class starts on Monday in October. We study English there.`,
+`The book that you lent me was excellent. My other book, which I bought yesterday, is still in my bag.
+The person who repaired my bike works at the shop near the station.
+The guide we met yesterday speaks three languages. In a formal account, you can write the guide whom we met.
+This is the coat that I bought. My blue coat, which I wore yesterday, is at home.
+The student who sits by the window and the students who sit behind her are in the same group.
+Here's the person I spoke to. In a formal report: the person to whom I spoke.
+That's the neighbour whose dog kept us awake last night.`,
+`She enjoys cooking, but she avoids washing the dishes until after dinner.
+We went skating on Saturday and went hiking on Sunday.
+We decided to take the train because we wanted to avoid traffic.
+He stopped working at noon. On his way home, he stopped to buy lunch.
+I'm looking forward to seeing you, and I'm nervous about giving the talk.
+She opened the parcel with scissors and found the instructions by scanning the code.
+Reading before bed helps me relax. It's also useful to keep the room quiet.
+It's important for guests to tell us about any allergies before dinner.
+I called to confirm the booking and bought a bag for the journey.
+This shelf is too high to reach, but the lower one is low enough to use.`,
+`I'm planning the journey. I know that the station closes after midnight.
+Where does Rosa live? Do you know where Rosa lives?
+Is the shop open? I can't tell whether or not the shop is open.
+Mia said that she needed help, so we went over after school.
+I'm glad that you arrived. The fact that you called helped us prepare.
+Will the play finish by nine? — I think so, but I'm not sure.
+When asked about the delay, Maya said, “I'm waiting for another bus.”
+“I've lost my key,” said Eli. Eli said that he had lost his key.
+On Monday Lee said, “I'll come tomorrow.” Later I explained that Lee had said he would come the next day.
+She told me the news, asked whether I could help, and replied to my message that evening.`,
+`I have finished today's work. By the time Sam called yesterday, I had finished yesterday's work too.
+When Dad called, we were eating. We'd already finished the cooking.
+Nina still lives near the school. Her brother doesn't live there anymore.
+She admitted that she had lost the key and explained that she couldn't get in.
+The hikers called home. We were relieved that everyone was safe.`,
+`The radio is loud. Turn it down before the baby wakes up.
+We had to put off the meeting. I had promised to look after my nephew.`,
+`Mina is good at solving puzzles, and her teammates rely on her.
+The coach is responsible for the trip. He apologised for changing the departure time.`
+];
+grammarCourse.forEach((chapter,chapterIndex)=>{
+ const examples=grammarContexts[chapterIndex].split('\n');
+ chapter.lessons.forEach((lesson,index)=>{lesson.context=examples[index]});
+});
