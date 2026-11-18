@@ -75,3 +75,15 @@ dialog{border:1px solid #e7e7e4;border-radius:8px;padding:24px;width:min(560px,c
 .low-vision :is(.topic-complete, .topic-retry, .topic-ring) { font-size: 1rem; }
 .low-vision .topic-ring { width: 3.6rem; }
 @media (max-width: 540px) { .topic-actions { justify-content: flex-start; padding-inline-start: .25rem; } }
+
+.topic-row:not(:has(.topic-ring)) { display: block; padding-inline-end: 0; }
+.topic-study { grid-column: 1 / -1; padding: 0 .25rem .55rem; }
+.topic-study .button { min-height: 44px; }
+.vocabulary-modes { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,13rem),1fr)); gap: .65rem; margin-block: 1rem; }
+.study-answers, .study-match > div { display: grid; gap: .45rem; }
+.study-match { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .55rem; }
+.study-match .answer { min-width: 0; white-space: normal; overflow-wrap: anywhere; }
+.study-match .answer[aria-pressed="true"] { outline: 2px solid #2866c5; outline-offset: -2px; }
+.study-match .answer:disabled { text-decoration: line-through; opacity: .6; }
+#study-form, .review-ratings { display: flex; align-items: center; flex-wrap: wrap; gap: .55rem; margin-block: .65rem; }
+#study-form input { flex: 1 1 10rem; min-width: 0; }
