@@ -9,6 +9,7 @@ function applyPreferences(){const root=document.documentElement;root.lang=prefer
 function persistPreferences(){applyPreferences();try{localStorage.setItem(preferenceKey,JSON.stringify(preferences));preferenceStorageFailed=false}catch{preferenceStorageFailed=true}}
 applyPreferences();
 const interfaceEnglish={
+'Тренажёр по грамматике':'Grammar trainer',
 'Всё об экзамене':'About the exam',
 'Перейти к содержимому':'Skip to content','Слово':'Slovo','Учебное пространство':'Study workspace','Моё пространство':'My workspace','Практика и материалы':'Practice and resources','Личное':'Personal',
 'Обзор':'Overview','Лексика':'Vocabulary','Словообразование':'Word formation','Мой словарь':'My vocabulary','Мой маршрут':'My learning path','Достижения':'Achievements','Пробники':'Mock exams','Тренажер по заданиям':'Task trainer','База знаний':'Knowledge base','Ожидаемый результат':'Expected result','Профиль':'Profile','Комьюнити':'Community','Настройки сайта':'Site settings','Оставить обратную связь':'Leave feedback',

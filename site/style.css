@@ -89,3 +89,17 @@ dialog{border:1px solid #e7e7e4;border-radius:8px;padding:24px;width:min(560px,c
 .study-match .answer:disabled { text-decoration: line-through; opacity: .6; }
 #study-form, .review-ratings { display: flex; align-items: center; flex-wrap: wrap; gap: .55rem; margin-block: .65rem; }
 #study-form input { flex: 1 1 10rem; min-width: 0; }
+
+.grammar-chapter { border-bottom: 1px solid var(--line); }
+.grammar-chapter summary { padding: .8rem .2rem; cursor: pointer; font-weight: 600; overflow-wrap: anywhere; }
+.grammar-chapter summary small { margin-inline-start: .4rem; color: var(--muted); font-weight: 400; }
+.grammar-lessons { padding-block-end: .6rem; }
+.grammar-lesson h3 { margin-block: 1.2rem .4rem; }
+.grammar-lesson p { line-height: 1.65; }
+.grammar-question { display: grid; gap: .3rem; margin: .9rem 0; }
+.grammar-question small { color: var(--muted); }
+.grammar-question .search-input { width: 100%; margin: 0; }
+.grammar-question .correct { border-color: #25834f; }
+.grammar-question .wrong { border-color: #ba3939; }
+.grammar-feedback:empty { display: none; }
+#grammar-result { margin-top: .75rem; }
