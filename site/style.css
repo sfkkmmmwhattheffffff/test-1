@@ -49,3 +49,29 @@ dialog{border:1px solid #e7e7e4;border-radius:8px;padding:24px;width:min(560px,c
 .exam-downloads li { border: 1px solid var(--line); border-radius: 8px; padding: .8rem 1rem; }
 .exam-downloads small { display: block; margin-top: .25rem; font-size: .85em; }
 .exam-sources { font-size: .9em; }
+
+.topic-row {
+ display: grid;
+ grid-template-columns: minmax(0, 1fr) auto;
+ align-items: center;
+ column-gap: .65rem;
+ border-bottom: 1px solid var(--line);
+ padding-inline-end: .35rem;
+}
+.topic-row .topic { border: 0; overflow-wrap: anywhere; }
+.topic-row.is-complete h3 { text-decoration: line-through; }
+.topic-ring { position: relative; display: grid; place-items: center; width: 3rem; aspect-ratio: 1; font-size: .67rem; font-weight: 700; }
+.topic-ring svg { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke-width: 3; }
+.topic-ring-track { stroke: var(--line); }
+.topic-ring-fill { stroke: #2866c5; }
+.topic-ring.is-complete .topic-ring-fill { stroke: #25834f; }
+.topic-actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: .35rem 1rem; padding: 0 0 .55rem; }
+.topic-complete, .topic-retry { display: inline-flex; align-items: center; gap: .45rem; font-size: .78rem; }
+.topic-retry { min-height: 44px; padding: .25rem .4rem; border: 0; border-radius: 6px; background: transparent; color: var(--ink); text-align: left; }
+.topic-retry:hover { text-decoration: underline; }
+.topic-status-icon { display: grid; place-items: center; flex: none; width: 1.6rem; height: 1.6rem; border-radius: 50%; color: #fff; font-size: 1.05rem; font-weight: 700; }
+.topic-complete .topic-status-icon { background: #217447; }
+.topic-retry .topic-status-icon { background: #185bbd; }
+.low-vision :is(.topic-complete, .topic-retry, .topic-ring) { font-size: 1rem; }
+.low-vision .topic-ring { width: 3.6rem; }
+@media (max-width: 540px) { .topic-actions { justify-content: flex-start; padding-inline-start: .25rem; } }

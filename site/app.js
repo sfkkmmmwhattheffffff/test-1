@@ -10,17 +10,71 @@ if(!state.practice||typeof state.practice!=='object'||Array.isArray(state.practi
 let session=null,currentPage='home',storageFailed=false,selectedChapter=null;
 const today=()=>new Date().toLocaleDateString('en-CA');
 const activeLearned=()=>state.learned.filter(w=>taskIds.has(w.id));
-const completed=c=>activeLearned().filter(w=>c.tasks.some(t=>t.id===w.id)).length;
+function topicRetry(c){
+ return Object.hasOwn(state.topicRetries||{},c.id)&&Array.isArray(state.topicRetries[c.id])
+  ? state.topicRetries[c.id] : null;
+}
+function topicProgress(c){
+ const correct=new Set(topicRetry(c)??activeLearned().map(word=>word.id));
+ return c.tasks.filter(task=>correct.has(task.id)).length;
+}
 function save(){try{localStorage.setItem(SlovoContent.preview?'slovo-preview-progress-v1':'slovo-oge-v1',JSON.stringify(state))}catch{storageFailed=true}renderStats()}
-function award(t){if(!state.learned.some(w=>w.id===t.id))state.learned.push({id:t.id,date:today()});if(!state.dates.includes(today()))state.dates.push(today())}
+function award(t,c){
+ const retry=topicRetry(c);
+ if(retry&&!retry.includes(t.id))retry.push(t.id);
+ if(!state.learned.some(w=>w.id===t.id))state.learned.push({id:t.id,date:today()});if(!state.dates.includes(today()))state.dates.push(today())}
 function streak(){let n=0,d=new Date();if(!state.dates.includes(today()))d.setDate(d.getDate()-1);while(state.dates.includes(d.toLocaleDateString('en-CA'))){n++;d.setDate(d.getDate()-1)}return n}
 function sourceMarkup(c){const source=preferences.language==='en'?(c.kind==='vocab'?'Quizlet · @antoxaenglish · Imported 18 November 2026.':c.readingType==='true-false-not-stated'?'New original reading practice. OGE 2027 written task type: 13–19. Not a FIPI bank task.':c.block?'Original practice text based on the Quizlet topic. The task format was checked against the FIPI OGE 2027 written sample. This is not a FIPI task.':'Original practice from Elizaveta’s local materials, 2 November 2026.'):c.source;return `<p class="source-note">${esc(source)} ${c.sourceUrl?`<a href="${esc(c.sourceUrl)}" target="_blank" rel="noopener noreferrer">Источник ↗</a>`:''}</p>`}
-function topicCards(list){return list.map(c=>{const i=chapters.indexOf(c);return `<button class="topic" data-topic="${i}"><span class="topic-art ${['peach','lilac','mint'][i%3]}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H5v18h14V8zM14 3v5h5M8 12h8M8 16h6"/></svg></span><div><small>${c.topicNumber?`Тема ${String(c.topicNumber).padStart(2,'0')}`:'Дополнительная практика'}</small><h3>${esc(preferences.language==='en'&&c.titleEn?c.titleEn:c.title)}</h3><p>${esc(c.subtitle)}</p><div class="topic-progress"><i style="width:${completed(c)/c.tasks.length*100}%"></i></div></div><span class="topic-meta">${completed(c)} / ${c.tasks.length} ↗</span></button>`}).join('')}
-function bindTopics(){document.querySelectorAll('[data-topic]').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.topic);if(chapters[i].kind==='vocab')viewVocabulary(i);else start(i)})}
+function topicStatus(c,i){
+ const count=topicProgress(c), total=c.tasks.length;
+ const percent=total?count/total*100:0;
+ const progressLabel=tr('Прогресс темы','Topic progress');
+ const done=total>0&&count===total;
+ return {
+  done,
+  ring:`<span class="topic-ring${done?' is-complete':''}" role="progressbar" aria-label="${progressLabel}" aria-valuemin="0" aria-valuemax="${total||1}" aria-valuenow="${count}">
+   <svg viewBox="0 0 36 36" aria-hidden="true">
+    <circle class="topic-ring-track" cx="18" cy="18" r="15"/>
+    <circle class="topic-ring-fill" cx="18" cy="18" r="15" pathLength="100" stroke-dasharray="${percent} 100" transform="rotate(-90 18 18)"/>
+   </svg><span aria-hidden="true">${Math.floor(percent)}%</span>
+  </span>`,
+  actions:done?`<div class="topic-actions">
+   <span class="topic-complete"><span class="topic-status-icon" aria-hidden="true">✓</span>${tr('Тема пройдена','Topic completed')}</span>
+   <button class="topic-retry" type="button" data-retry-topic="${i}"><span class="topic-status-icon" aria-hidden="true">↻</span>${tr('Пройти тему ещё раз','Retake topic')}</button>
+  </div>`:''
+ };
+}
+function topicCards(list){
+ return list.map(c=>{
+  const i=chapters.indexOf(c), status=topicStatus(c,i);
+  const title=preferences.language==='en'&&c.titleEn?c.titleEn:c.title;
+  return `<div class="topic-row${status.done?' is-complete':''}">
+   <button class="topic" type="button" data-topic="${i}">
+    <div><small>${c.topicNumber?`Тема ${String(c.topicNumber).padStart(2,'0')}`:'Дополнительная практика'}</small>
+    <h3>${esc(title)}</h3><p>${esc(c.subtitle)}</p></div>
+   </button>
+   ${status.ring}${status.actions}
+  </div>`;
+ }).join('');
+}
+function restartTopic(i){
+ const c=chapters[i];
+ state.topicRetries={...state.topicRetries,[c.id]:[]};
+ save();
+ start(i,true,'all');
+}
+function bindTopics(){
+ document.querySelectorAll('[data-topic]').forEach(b=>b.onclick=()=>{
+  const i=Number(b.dataset.topic);
+  if(chapters[i].kind==='vocab')viewVocabulary(i);
+  else start(i);
+ });
+ document.querySelectorAll('[data-retry-topic]').forEach(b=>b.onclick=()=>restartTopic(Number(b.dataset.retryTopic)));
+}
 function renderStats(){$('#word-count').textContent=activeLearned().filter(w=>vocabIds.has(w.id)).length}
 function shuffle(items){const a=[...items];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function chooseQuizLength(topic){const c=chapters[topic];session={mode:'length',topic};$('#trainer').classList.remove('wide-trainer');$('#session-label').textContent=tr('ПРОВЕРИТЬ СЕБЯ','CHECK YOURSELF')+' · '+(preferences.language==='en'?(interfaceEnglish[c.title]||c.title):c.title);$('#session-progress').style.width='0%';$('#exercise').innerHTML=`<div class="quiz-length-heading"><h2>${tr('Сколько слов потренируем?','How many words would you like to practise?')}</h2><p>${tr('Выбери длину этой тренировки.','Choose the length of this session.')}</p></div><div class="quiz-length-options">${[['6',tr('6 слов','6 words'),tr('Короткая тренировка','A short session')],['50',tr('50 слов','50 words'),tr('Большая тренировка','A longer session')],['all',tr('Все слова','All words'),tr('Весь набор: ','The whole set: ')+c.tasks.length]].map(([value,label,description])=>`<button class="quiz-length-option" data-quiz-size="${value}"><strong>${label}</strong><small>${description}</small></button>`).join('')}</div><p class="feature-note">${tr('В коротких тренировках сначала идут слова без правильного ответа. «Все слова» включает весь набор, даже слова, на которые ты уже отвечала верно.','Shorter sessions prioritise words not yet answered correctly. All words includes the whole set, even words you have answered correctly before.')}</p>`;document.querySelectorAll('[data-quiz-size]').forEach(b=>b.onclick=()=>start(topic,false,b.dataset.quizSize==='all'?'all':Number(b.dataset.quizSize)));if(!$('#trainer').open)$('#trainer').showModal()}
-function start(topic=0,review=false,size=6){const c=chapters[topic];let tasks=c.tasks;const limit=[6,50,'all'].includes(size)?size:6;if(c.kind==='vocab'){if(limit==='all')tasks=[...c.tasks];else{const pending=tasks.filter(t=>!state.learned.some(w=>w.id===t.id)),known=tasks.filter(t=>state.learned.some(w=>w.id===t.id));tasks=(review||!pending.length?shuffle(tasks):[...pending,...known]).slice(0,limit)}}session={topic,tasks,index:0,correct:0,answered:false,used:[],review,limit};if(!$('#trainer').open)$('#trainer').showModal();if(c.passage)$('#trainer').classList.add('wide-trainer');if(c.block)renderFormationBlock();else renderExercise()}
+function start(topic=0,review=false,size=6){const c=chapters[topic];let tasks=c.tasks;const limit=[6,50,'all'].includes(size)?size:6;if(c.kind==='vocab'){if(limit==='all')tasks=[...c.tasks];else{const knownIds=new Set(topicRetry(c)??state.learned.map(w=>w.id)),pending=tasks.filter(t=>!knownIds.has(t.id)),known=tasks.filter(t=>knownIds.has(t.id));tasks=(review||!pending.length?shuffle(tasks):[...pending,...known]).slice(0,limit)}}session={topic,tasks,index:0,correct:0,answered:false,used:[],review,limit};if(!$('#trainer').open)$('#trainer').showModal();if(c.passage)$('#trainer').classList.add('wide-trainer');if(c.block)renderFormationBlock();else renderExercise()}
 const normalise=s=>s.toLowerCase().replace(/[\s'’]/g,'').trim();
 const wordForm=s=>s.trim().toLowerCase();
 function isCorrect(t,value,c){const clean=c.kind==='formation'?wordForm:normalise;return(t.accepted||[t.answer]).some(a=>clean(value)===clean(a))}
@@ -33,11 +87,11 @@ function renderExercise(){const c=chapters[session.topic],t=session.tasks[sessio
 if(c.kind==='vocab'){const pool=[...new Set(c.tasks.map(x=>x.answer))].filter(v=>v!==t.answer);choices=shuffle([t.answer,...shuffle(pool).slice(0,3)])}
 $('#exercise').innerHTML=`${c.passage?`<details class="reading-passage" open><summary>${esc(c.passageTitle)}</summary><div data-no-translate lang="en">${c.passage.map(p=>`<p>${esc(p)}</p>`).join('')}</div></details>`:''}<div class="exercise-word"><span class="eyebrow">${label}</span>${c.kind==='vocab'?`<h2>${esc(t.prompt)}</h2><p>Тема: ${esc(c.title)}</p>`:`<h3>${esc(t.base)}</h3><p class="task-text">${esc(t.prompt)}</p>`}${sourceMarkup(c)}</div>${choices?`<div class="answer-grid">${choices.map(v=>`<button class="answer" ${c.kind==='reading'&&c.readingType!=='true-false-not-stated'&&session.used.includes(v[0])?'disabled':''}>${esc(v)}</button>`).join('')}</div>`:'<form id="answer-form"><label for="typed-answer">Твой ответ</label><input id="typed-answer" autocomplete="off" autocapitalize="none" spellcheck="false" required><button class="button dark">Проверить</button></form>'}<div id="feedback" aria-live="polite"></div>`;
 if(choices)document.querySelectorAll('.answer').forEach(b=>b.onclick=()=>answer(c.kind==='reading'?b.textContent[0]:b.textContent,b));else{$('#answer-form').onsubmit=e=>{e.preventDefault();answer($('#typed-answer').value)};$('#typed-answer').focus()}}
-function answer(value,button){if(session.answered||!value.trim())return;session.answered=true;const c=chapters[session.topic],t=session.tasks[session.index],correct=isCorrect(t,value,c);recordAttempt(t,correct,c);if(correct){session.correct++;award(t)}save();if(c.kind==='reading'&&c.readingType!=='true-false-not-stated')session.used.push(t.answer);
+function answer(value,button){if(session.answered||!value.trim())return;session.answered=true;const c=chapters[session.topic],t=session.tasks[session.index],correct=isCorrect(t,value,c);recordAttempt(t,correct,c);if(correct){session.correct++;award(t,c)}save();if(c.kind==='reading'&&c.readingType!=='true-false-not-stated')session.used.push(t.answer);
 document.querySelectorAll('.answer').forEach(b=>{b.disabled=true;if((c.kind==='reading'?b.textContent[0]:b.textContent)===t.answer)b.classList.add('correct')});if(button&&!correct)button.classList.add('wrong');if($('#typed-answer')){$('#typed-answer').disabled=true;$('#answer-form button').disabled=true}
 $('#feedback').innerHTML=`<p class="feedback">${correct?'✦ Верно!':`Правильный ответ: <strong>${esc(t.answer)}</strong>.`}<br>${esc(explanationFor(c,t))}</p><button class="button dark next" id="next">${session.index===session.tasks.length-1?'Посмотреть результат':'Следующее задание →'}</button>`;$('#next').onclick=()=>{session.index++;session.answered=false;if(session.index===session.tasks.length)finish();else renderExercise()}}
 function renderFormationBlock(){const c=chapters[session.topic];$('#trainer').classList.add('wide-trainer');$('#session-label').textContent=`СЛОВООБРАЗОВАНИЕ · ${c.title.toUpperCase()}`;$('#session-progress').style.width='0%';$('#exercise').innerHTML=`<div class="formation-intro"><span class="eyebrow">АВТОРСКАЯ ТРЕНИРОВКА · 29–34</span><h2>${esc(c.textTitle)}</h2><p>Прочитай текст. Преобразуй слова справа так, чтобы они грамматически и лексически соответствовали тексту. В каждый пропуск впиши одно слово.</p></div><form id="formation-form"><p class="task-text">${esc(c.intro)}</p>${c.tasks.map((t,i)=>`<div class="gap-row"><label for="gap-${i}"><strong>${t.number}.</strong> ${esc(t.prompt)}</label><div class="gap-entry"><strong>${esc(t.base)}</strong><input id="gap-${i}" name="gap-${i}" aria-label="Ответ ${t.number}" autocomplete="off" autocapitalize="none" spellcheck="false" required></div><div class="gap-feedback" id="gap-feedback-${i}"></div></div>`).join('')}<button class="button dark" id="check-block">Проверить все 6 ответов</button></form>${sourceMarkup(c)}<div id="block-result" aria-live="polite"></div>`;
-$('#formation-form').onsubmit=e=>{e.preventDefault();if(session.answered)return;session.answered=true;const results=c.tasks.map((t,i)=>{const input=$(`#gap-${i}`),value=input.value,correct=isCorrect(t,value,c);recordAttempt(t,correct,c);input.disabled=true;input.classList.add(correct?'correct':'wrong');if(correct){session.correct++;award(t)}$(`#gap-feedback-${i}`).innerHTML=`<p>${correct?tr('✓ Верно','✓ Correct'):tr('Твой ответ: ','Your answer: ')+esc(value)+tr('. Ответ: ','. Answer: ')+`<strong>${esc(t.answer)}</strong>`}. ${esc(explanationFor(c,t))}</p>`;return{number:t.number,value,correct}});save();$('#check-block').disabled=true;$('#session-progress').style.width='100%';$('#block-result').innerHTML=`<h3>Верных ответов: ${session.correct} из 6</h3><p>Это результат авторской тренировки, а не экзаменационная оценка.</p><button class="button dark next" id="finish">Продолжить ↗</button><button class="text-button" id="repeat">Повторить текст</button>`;$('#finish').onclick=closeTraining;$('#repeat').onclick=()=>{session.correct=0;session.answered=false;renderFormationBlock()};$('#block-result').scrollIntoView({block:'nearest'})}}
+$('#formation-form').onsubmit=e=>{e.preventDefault();if(session.answered)return;session.answered=true;const results=c.tasks.map((t,i)=>{const input=$(`#gap-${i}`),value=input.value,correct=isCorrect(t,value,c);recordAttempt(t,correct,c);input.disabled=true;input.classList.add(correct?'correct':'wrong');if(correct){session.correct++;award(t,c)}$(`#gap-feedback-${i}`).innerHTML=`<p>${correct?tr('✓ Верно','✓ Correct'):tr('Твой ответ: ','Your answer: ')+esc(value)+tr('. Ответ: ','. Answer: ')+`<strong>${esc(t.answer)}</strong>`}. ${esc(explanationFor(c,t))}</p>`;return{number:t.number,value,correct}});save();$('#check-block').disabled=true;$('#session-progress').style.width='100%';$('#block-result').innerHTML=`<h3>Верных ответов: ${session.correct} из 6</h3><p>Это результат авторской тренировки, а не экзаменационная оценка.</p><button class="button dark next" id="finish">Продолжить ↗</button><button class="text-button" id="repeat">Повторить текст</button>`;$('#finish').onclick=closeTraining;$('#repeat').onclick=()=>{session.correct=0;session.answered=false;renderFormationBlock()};$('#block-result').scrollIntoView({block:'nearest'})}}
 function closeTraining(){$('#trainer').close();$('#trainer').classList.remove('wide-trainer');if(selectedChapter!==null&&currentPage==='vocabulary')viewVocabulary(selectedChapter);else showPage(currentPage)}
 function finish(){const n=session.tasks.length;$('#session-progress').style.width='100%';$('#session-label').textContent='ТРЕНИРОВКА ЗАВЕРШЕНА';$('#exercise').innerHTML=`<div class="exercise-word"><div class="result-icon">✳</div><h2>Маленький шаг сделан!</h2><p>Верных ответов: <strong>${session.correct} из ${n}</strong>.<br>Один верный ответ ещё не означает, что слово усвоено надолго.</p><p>${storageFailed?'Браузер запретил сохранение: прогресс доступен до закрытия страницы.':'Прогресс сохранён в этом браузере. XP начисляется один раз за задание.'}</p><button class="button dark next" id="finish">Продолжить ↗</button><button class="text-button" id="repeat">Повторить сессию</button>${chapters[session.topic].kind==='vocab'&&session.limit!=='all'?`<button class="text-button" id="next-batch">${tr('Следующие '+session.limit+' слов →','Next '+session.limit+' words →')}</button>`:''}</div>`;$('#finish').onclick=closeTraining;$('#repeat').onclick=()=>{session.index=0;session.correct=0;session.answered=false;session.used=[];renderExercise()};if($('#next-batch'))$('#next-batch').onclick=()=>{const {topic,limit}=session;$('#trainer').close();start(topic,false,limit)}}
 function viewVocabulary(i){selectedChapter=i;showPage('vocabulary',true);const c=chapters[i];$('#page-title').textContent=c.title;$('#page-description').textContent='Лексика · Тема '+c.topicNumber;$('.breadcrumb strong').textContent='Лексика / '+c.title;$('#secondary-view').innerHTML=`<button class="text-button" id="back-topics">← Все темы</button><div class="chapter-heading"><h2>${esc(c.title)}</h2><p>${c.tasks.length} слов и выражений · ${c.sourceCount} исходных карточек · повторы объединены</p><div class="chapter-actions"><button class="button dark" id="chapter-flashcards">Карточки — учить</button><button class="button light" id="chapter-start">Проверить себя</button><button class="button light" id="chapter-formation">Задания ОГЭ</button></div></div><label class="search-label" for="word-search">Найти слово или перевод</label><input class="search-input" id="word-search" type="search" placeholder="Например: friend или друг"><p id="search-count"></p><div class="word-list" id="catalogue"></div>${sourceMarkup(c)}`;
@@ -64,7 +118,7 @@ $('#header-sections-toggle').onclick=()=>{const menu=$('#header-sections');if(!m
 document.addEventListener('click',e=>{if(!e.target.closest('#header-sections,#header-sections-toggle'))closeHeaderSections()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#header-sections').hidden){e.preventDefault();closeHeaderSections(true)}});
 $('#workspace-home').onclick=()=>showPage('home');syncSidebar();
-document.querySelectorAll('[data-page],[data-open-page]').forEach(b=>b.onclick=()=>showPage(b.dataset.page||b.dataset.openPage));$('#close-trainer').onclick=closeTraining;$('#trainer').addEventListener('cancel',()=>$('#trainer').classList.remove('wide-trainer'));$('#help').onclick=()=>$('#info').showModal();$('.close-info').onclick=()=>$('#info').close();$('#reset').onclick=()=>{state={learned:[],dates:[],practice:{}};save();showPage(currentPage);$('#reset-status').textContent='Прогресс ОГЭ сброшен.'};showPage(previewInitialPage());
+document.querySelectorAll('[data-page],[data-open-page]').forEach(b=>b.onclick=()=>showPage(b.dataset.page||b.dataset.openPage));$('#close-trainer').onclick=closeTraining;$('#trainer').addEventListener('cancel',event=>{event.preventDefault();closeTraining()});$('#help').onclick=()=>$('#info').showModal();$('.close-info').onclick=()=>$('#info').close();$('#reset').onclick=()=>{state={learned:[],dates:[],practice:{}};save();showPage(currentPage);$('#reset-status').textContent='Прогресс ОГЭ сброшен.'};showPage(previewInitialPage());
 if(SlovoContent.preview){const lessonId=new URLSearchParams(location.search).get('lesson');const i=chapters.findIndex(c=>c.id===lessonId);if(i>=0){if(chapters[i].kind==='vocab')viewVocabulary(i);else start(i)}}
 startInterfaceTranslation();
 
