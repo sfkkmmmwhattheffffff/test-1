@@ -37,3 +37,15 @@ dialog{border:1px solid #e7e7e4;border-radius:8px;padding:24px;width:min(560px,c
 /* Dark Union Jack navigation */
 .sidebar{isolation:isolate;overflow-x:hidden;overflow-y:auto;background:#08152c;border-right-color:#ffffff1f;color:#fff}.sidebar::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,#061127ad,#061127cc),url("assets/union-jack.svg") center/100% 100% no-repeat;filter:blur(7px)}
 .sidebar .workspace{width:fit-content;max-width:100%;flex-shrink:0;color:#fff;gap:12px}.sidebar .workspace:hover{background:#ffffff18}.sidebar .workspace-icon{background:#fff;color:#18233a;border-color:#fff;box-shadow:2px 2px 0 #ffffff65}.sidebar .workspace strong{color:#fff;font-size:16px}.sidebar :is(.nav-item,.nav-item.active,.nav-icon,.nav-item b,.sidebar-section-label,.sidebar-course,.sidebar-course small,.privacy,.editor-entry-link){color:#fff}.sidebar .nav-item:hover{background:#ffffff1c}.sidebar .nav-item.active{background:#ffffff26;font-weight:600}.sidebar .sidebar-section-label{color:#ffffffe0}.sidebar .sidebar-course{border-color:#ffffff30}.sidebar .editor-entry-link:hover{color:#fff;background:#ffffff18}.sidebar .privacy{color:#ffffffe0}.low-vision .sidebar :is(.nav-icon,.sidebar-section-label,.sidebar-course small){color:#fff!important}.low-vision .sidebar::before{background-image:linear-gradient(#061127ed,#061127ed),url("assets/union-jack.svg")}.sidebar button:focus-visible,.sidebar a:focus-visible{outline-color:#fff}
+
+.exam-guide { max-width: 76ch; line-height: 1.7; }
+.exam-guide h2 { margin: 2rem 0 .75rem; }
+.exam-guide h3 { margin: 1.35rem 0 .3rem; }
+.exam-guide p { margin: 0 0 .8rem; }
+.exam-guide ol { padding-inline-start: 1.8em; }
+.exam-guide li + li { margin-top: .7rem; }
+.exam-guide a { color: inherit; text-underline-offset: .18em; }
+.exam-downloads { list-style: none; padding: 0; }
+.exam-downloads li { border: 1px solid var(--line); border-radius: 8px; padding: .8rem 1rem; }
+.exam-downloads small { display: block; margin-top: .25rem; font-size: .85em; }
+.exam-sources { font-size: .9em; }

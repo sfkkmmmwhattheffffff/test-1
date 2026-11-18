@@ -9,6 +9,7 @@ function applyPreferences(){const root=document.documentElement;root.lang=prefer
 function persistPreferences(){applyPreferences();try{localStorage.setItem(preferenceKey,JSON.stringify(preferences));preferenceStorageFailed=false}catch{preferenceStorageFailed=true}}
 applyPreferences();
 const interfaceEnglish={
+'Всё об экзамене':'About the exam',
 'Перейти к содержимому':'Skip to content','Слово':'Slovo','Учебное пространство':'Study workspace','Моё пространство':'My workspace','Практика и материалы':'Practice and resources','Личное':'Personal',
 'Обзор':'Overview','Лексика':'Vocabulary','Словообразование':'Word formation','Мой словарь':'My vocabulary','Мой маршрут':'My learning path','Достижения':'Achievements','Пробники':'Mock exams','Тренажер по заданиям':'Task trainer','База знаний':'Knowledge base','Ожидаемый результат':'Expected result','Профиль':'Profile','Комьюнити':'Community','Настройки сайта':'Site settings','Оставить обратную связь':'Leave feedback',
 'Английский язык':'English','Подготовка к ОГЭ':'OGE preparation','Прогресс в этом браузере':'Progress stays in this browser','Локальное пространство':'Local workspace','О проекте':'About this project','Навигация':'Navigation','Переключить меню':'Toggle menu','Открыть меню':'Open menu','Скрыть меню':'Hide menu','Закрыть меню':'Close menu',
