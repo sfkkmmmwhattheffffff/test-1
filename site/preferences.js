@@ -1,11 +1,12 @@
 /* Interface preferences are separate from academic progress. */
+const preferenceKey=new URLSearchParams(location.search).get('preview')==='1'?'slovo-preview-preferences-v1':'slovo-preferences-v1';
 const preferenceDefaults={language:'ru',theme:'light',lowVision:false,layout:'notion',fun:false};
 let preferences={...preferenceDefaults},preferenceStorageFailed=false;
-try{const saved=JSON.parse(localStorage.getItem('slovo-preferences-v1'));if(saved&&typeof saved==='object'){for(const key of ['language','theme','layout'])if(typeof saved[key]==='string')preferences[key]=saved[key];for(const key of ['lowVision','fun'])if(typeof saved[key]==='boolean')preferences[key]=saved[key]}}catch{}
+try{const saved=JSON.parse(localStorage.getItem(preferenceKey));if(saved&&typeof saved==='object'){for(const key of ['language','theme','layout'])if(typeof saved[key]==='string')preferences[key]=saved[key];for(const key of ['lowVision','fun'])if(typeof saved[key]==='boolean')preferences[key]=saved[key]}}catch{}
 if(!['ru','en'].includes(preferences.language))preferences.language='ru';if(!['light','dark'].includes(preferences.theme))preferences.theme='light';if(!['notion','compact'].includes(preferences.layout))preferences.layout='notion';
 const tr=(ru,en)=>preferences.language==='en'?en:ru;
 function applyPreferences(){const root=document.documentElement;root.lang=preferences.language;root.dataset.theme=preferences.theme;root.dataset.layout=preferences.layout;root.classList.toggle('low-vision',preferences.lowVision);root.dataset.fun=String(preferences.fun);root.style.colorScheme=preferences.theme;document.title=tr('Слово — английский · ОГЭ','Slovo — English · OGE')}
-function persistPreferences(){applyPreferences();try{localStorage.setItem('slovo-preferences-v1',JSON.stringify(preferences));preferenceStorageFailed=false}catch{preferenceStorageFailed=true}}
+function persistPreferences(){applyPreferences();try{localStorage.setItem(preferenceKey,JSON.stringify(preferences));preferenceStorageFailed=false}catch{preferenceStorageFailed=true}}
 applyPreferences();
 const interfaceEnglish={
 'Перейти к содержимому':'Skip to content','Слово':'Slovo','Учебное пространство':'Study workspace','Моё пространство':'My workspace','Практика и материалы':'Practice and resources','Личное':'Personal',
