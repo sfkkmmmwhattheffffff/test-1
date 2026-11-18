@@ -25,6 +25,10 @@ function award(t,c){
  if(!state.learned.some(w=>w.id===t.id))state.learned.push({id:t.id,date:today()});if(!state.dates.includes(today()))state.dates.push(today())}
 function streak(){let n=0,d=new Date();if(!state.dates.includes(today()))d.setDate(d.getDate()-1);while(state.dates.includes(d.toLocaleDateString('en-CA'))){n++;d.setDate(d.getDate()-1)}return n}
 function sourceMarkup(c){const source=preferences.language==='en'?(c.kind==='vocab'?'Quizlet · @antoxaenglish · Imported 18 November 2026.':c.readingType==='true-false-not-stated'?'New original reading practice. OGE 2027 written task type: 13–19. Not a FIPI bank task.':c.block?'Original practice text based on the Quizlet topic. The task format was checked against the FIPI OGE 2027 written sample. This is not a FIPI task.':'Original practice from Elizaveta’s local materials, 2 November 2026.'):c.source;return `<p class="source-note">${esc(source)} ${c.sourceUrl?`<a href="${esc(c.sourceUrl)}" target="_blank" rel="noopener noreferrer">Источник ↗</a>`:''}</p>`}
+const vocabularyTopicEmoji={
+ 1:'👪', 2:'🪞', 3:'🎨', 4:'🏃', 5:'🛍️', 6:'🏫', 7:'💼',
+ 8:'🧳', 9:'🏙️', 10:'🌿', 11:'📰', 12:'🌍', 13:'🌟'
+};
 function topicStatus(c,i){
  const count=topicProgress(c), total=c.tasks.length;
  const percent=total?count/total*100:0;
@@ -32,11 +36,11 @@ function topicStatus(c,i){
  const done=total>0&&count===total;
  return {
   done,
-  ring:`<span class="topic-ring${done?' is-complete':''}" role="progressbar" aria-label="${progressLabel}" aria-valuemin="0" aria-valuemax="${total||1}" aria-valuenow="${count}">
+  ring:`<span class="topic-ring${done?' is-complete':''}" role="progressbar" aria-label="${progressLabel}" aria-valuemin="0" aria-valuemax="${total||1}" aria-valuenow="${count}" aria-valuetext="${tr(Math.floor(percent)+'% изучено',Math.floor(percent)+'% learned')}">
    <svg viewBox="0 0 36 36" aria-hidden="true">
     <circle class="topic-ring-track" cx="18" cy="18" r="15"/>
     <circle class="topic-ring-fill" cx="18" cy="18" r="15" pathLength="100" stroke-dasharray="${percent} 100" transform="rotate(-90 18 18)"/>
-   </svg><span aria-hidden="true">${Math.floor(percent)}%</span>
+   </svg><span aria-hidden="true">${tr(Math.floor(percent)+'% изучено',Math.floor(percent)+'% learned')}</span>
   </span>`,
   actions:done?`<div class="topic-actions">
    <span class="topic-complete"><span class="topic-status-icon" aria-hidden="true">✓</span>${tr('Тема пройдена','Topic completed')}</span>
@@ -48,13 +52,13 @@ function topicCards(list, vocabularyList=false){
  return list.map(c=>{
   const i=chapters.indexOf(c), status=vocabularyList?topicStatus(c,i):null;
   const title=preferences.language==='en'&&c.titleEn?c.titleEn:c.title;
-  return `<div class="topic-row${status?.done?' is-complete':''}">
+  return `<div class="topic-row${vocabularyList?' vocabulary-topic-row':''}${status?.done?' is-complete':''}">
    <button class="topic" type="button" data-topic="${i}">
+    ${vocabularyList?`<span class="topic-emoji" aria-hidden="true">${vocabularyTopicEmoji[c.topicNumber]??'📚'}</span>`:''}
     <div><small>${c.topicNumber?`Тема ${String(c.topicNumber).padStart(2,'0')}`:'Дополнительная практика'}</small>
-    <h3>${esc(title)}</h3><p>${esc(c.subtitle)}</p></div>
+    <h3>${esc(title)}</h3><p>${esc(c.subtitle)}</p>${status?.ring??''}</div>
    </button>
-   ${status?.ring??''}
-   ${vocabularyList?`<div class="topic-study"><button class="button light" type="button" data-study-topic="${i}">${tr('Изучить слова','Study words')}</button></div>`:''}
+   ${vocabularyList?`<div class="topic-study"><button class="button dark" type="button" data-study-topic="${i}">${tr('Учить','Study')}</button></div>`:''}
    ${status?.actions??''}
   </div>`;
  }).join('');
