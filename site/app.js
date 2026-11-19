@@ -130,7 +130,7 @@ function viewVocabulary(i,backPage='vocabulary'){
   <button class="text-button" id="back-topics">${tr('← Все темы','← All topics')}</button>
   <div class="chapter-actions">
    <button class="button light" id="chapter-wordlist" aria-expanded="false" aria-controls="chapter-words">${tr('Вордлист','Word list')}</button>
-   <button class="button dark" id="chapter-flashcards">${tr('Учить слова','Study words')}</button>
+   <button class="button light" id="chapter-flashcards">${tr('Учить слова','Study words')}</button>
    <button class="button light" id="chapter-start">${tr('Проверить себя','Check yourself')}</button>
    <button class="button light" id="chapter-formation">${tr('Задания формата ОГЭ','OGE-style tasks')}</button>
   </div>
