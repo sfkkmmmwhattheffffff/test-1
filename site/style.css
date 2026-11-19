@@ -168,11 +168,6 @@ main { transition: none; }
 .sidebar { padding: 12px 8px 16px; transition: transform var(--menu) var(--ease-ui); }
 .sidebar-section-label { padding: 20px 12px 8px; }
 .sidebar .nav-item { position: relative; gap: 8px; padding: 8px 12px; border-radius: 6px; }
-.sidebar .nav-item.active::after {
- content: ""; position: absolute; inset: auto 12px 4px 40px; height: 1px;
- background: #ffffff94; transform-origin: left;
- animation: slovo-underline var(--menu) var(--ease-ui) both;
-}
 .workspace .workspace-icon { box-shadow: none; }
 .page-links, .vocab-card, .topic-row { border-color: var(--line); }
 .page-links { background: var(--sheet); }
@@ -222,7 +217,6 @@ dialog[open]::backdrop { animation: slovo-veil var(--menu) var(--ease-ui) both; 
 @keyframes slovo-enter { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes slovo-turn { from { opacity: 0; transform: perspective(400px) rotateX(-14deg) translateY(3px); } to { opacity: 1; transform: perspective(400px) rotateX(0); } }
 @keyframes slovo-veil { from { opacity: 0; } to { opacity: 1; } }
-@keyframes slovo-underline { from { transform: scaleX(.15); opacity: 0; } to { transform: scaleX(1); opacity: 1; } }
 @media(max-width: 800px) {
  .content { padding-inline: 24px; }
 }
