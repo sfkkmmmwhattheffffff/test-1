@@ -59,7 +59,7 @@ function topicCards(list, vocabularyList=false){
    <button class="topic" type="button" data-topic="${i}">
     ${vocabularyList?`<span class="topic-emoji" aria-hidden="true">${vocabularyTopicEmoji[c.topicNumber]??'📚'}</span>`:''}
     <div><small>${c.topicNumber?`Тема ${String(c.topicNumber).padStart(2,'0')}`:'Дополнительная практика'}</small>
-    <h3>${esc(title)}</h3><p>${esc(c.subtitle)}</p>${status?.ring??''}</div>
+    <h3>${esc(title)}</h3><p>${vocabularyList?tr('Терминов: ','Terms: ')+c.tasks.length:esc(c.subtitle)}</p>${status?.ring??''}</div>
    </button>
    ${vocabularyList?`<div class="topic-study"><button class="button dark" type="button" data-study-topic="${i}">${tr('Учить','Study')}</button></div>`:''}
    ${status?.actions??''}
@@ -217,7 +217,11 @@ function viewVocabulary(i,backPage='vocabulary'){
  const c=chapters[i];
  const title=preferences.language==='en'&&c.titleEn?c.titleEn:c.title;
  $('#page-title').textContent=title;
- $('.breadcrumb strong').textContent=tr('Лексика','Vocabulary')+' / '+title;
+ const crumb=$('.breadcrumb strong');
+ const topicTitle=document.createElement('span');
+ topicTitle.className='breadcrumb-topic-title';
+ topicTitle.textContent=' / '+title;
+ crumb.replaceChildren(tr('Лексика','Vocabulary'),topicTitle);
  $('#secondary-view').innerHTML=`
   <button class="text-button" id="back-topics">${tr('← Все темы','← All topics')}</button>
   <div class="chapter-actions">
@@ -236,7 +240,7 @@ function viewVocabulary(i,backPage='vocabulary'){
   const tasks=c.tasks.filter(task=>(task.prompt+' '+task.answer).toLocaleLowerCase().includes(query));
   const known=new Set(activeLearned().map(word=>word.id));
   $('#search-count').textContent=tr('Найдено: ','Found: ')+tasks.length+' / '+c.tasks.length;
-  $('#catalogue').innerHTML=tasks.map(task=>`<div class="vocab-card"><small>${known.has(task.id)?tr('ВЕРНЫЙ ОТВЕТ ✓','CORRECT ANSWER ✓'):tr('ДЛЯ ПРАКТИКИ','TO PRACTISE')}</small><h3>${esc(task.prompt)}</h3><strong>${esc(task.answer)}</strong></div>`).join('')||`<p>${tr('Ничего не найдено.','No terms found.')}</p>`;
+  $('#catalogue').innerHTML=tasks.map(task=>`<div class="vocab-card">${known.has(task.id)?`<small class="term-status">${tr('Выучено','Learnt')}</small>`:''}<h3>${esc(task.prompt)}</h3><strong>${esc(task.answer)}</strong></div>`).join('')||`<p>${tr('Ничего не найдено.','No terms found.')}</p>`;
  }
  $('#chapter-wordlist').onclick=()=>{
   const panel=$('#chapter-words');
@@ -251,7 +255,7 @@ function viewVocabulary(i,backPage='vocabulary'){
  $('#chapter-flashcards').onclick=()=>openVocabularyModes(i);
  $('#chapter-formation').onclick=()=>start(chapters.findIndex(chapter=>chapter.block&&chapter.topicNumber===c.topicNumber));
 }
-function renderLibrary(kind){const list=chapters.filter(c=>c.kind===kind);$('#secondary-view').innerHTML=`<p class="route-intro">${kind==='vocab'?`Все 13 доступных наборов Quizlet · ${vocabulary.reduce((n,c)=>n+c.tasks.length,0)} слов и выражений после объединения повторов.<br>В исходной папке нет набора 14/14.`:'13 новых текстов по темам Quizlet и дополнительная тренировка из материалов Елизаветы. Новые тексты: 6 пропусков, без вариантов ответа.'}</p><label class="search-label" for="topic-search">Найти тему</label><input class="search-input" id="topic-search" type="search" placeholder="Название темы"><div class="topic-list" id="library-topics"></div>`;function update(){const q=$('#topic-search').value.trim().toLowerCase(),filtered=list.filter(c=>(c.title+' '+c.subtitle+' '+c.source).toLowerCase().includes(q));$('#library-topics').innerHTML=topicCards(filtered,kind==='vocab')||'<p>Темы не найдены.</p>';bindTopics()}update();$('#topic-search').oninput=update}
+function renderLibrary(kind){const list=chapters.filter(c=>c.kind===kind);$('#secondary-view').innerHTML=`<p class="route-intro">${kind==='vocab'?`${vocabulary.length} ${tr('тем','topics')} · ${vocabulary.reduce((n,c)=>n+c.tasks.length,0)} ${tr('терминов','terms')}`:'13 новых текстов по темам Quizlet и дополнительная тренировка из материалов Елизаветы. Новые тексты: 6 пропусков, без вариантов ответа.'}</p><label class="search-label" for="topic-search">Найти тему</label><input class="search-input" id="topic-search" type="search" placeholder="Название темы"><div class="topic-list" id="library-topics"></div>`;function update(){const q=$('#topic-search').value.trim().toLowerCase(),filtered=list.filter(c=>(c.title+' '+c.subtitle+' '+c.source).toLowerCase().includes(q));$('#library-topics').innerHTML=topicCards(filtered,kind==='vocab')||'<p>Темы не найдены.</p>';bindTopics()}update();$('#topic-search').oninput=update}
 const emptyPages=new Set(['grammar-trainer','mocks','forecast','path','achievements']);
 function showPage(page,keepChapter=false){closeHeaderSections();currentPage=page;if(!keepChapter)selectedChapter=null;const names={...Object.fromEntries(Object.entries(featurePages).map(([key,value])=>[key,value.ru])),russia:'Russia in English',home:'Обзор',words:'Мой словарь',vocabulary:'Лексика',formation:'Словообразование',path:'Мой маршрут',achievements:'Достижения'};$('.breadcrumb strong').textContent=names[page];$('#page-icon').textContent={...Object.fromEntries(Object.entries(featurePages).map(([key,value])=>[key,value.icon])),home:'📖',vocabulary:'📚',formation:'✏️',russia:'🇷🇺',words:'🗂️',path:'🧭',achievements:'🏅'}[page];document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.page===page));$('#home-view').hidden=page!=='home';$('#secondary-view').hidden=page==='home';$('#page-title').innerHTML=page==='home'?'Привет, это Слово — платформа для подготовки к ОГЭ по английскому языку.':names[page];
 const isEmpty=emptyPages.has(page);
