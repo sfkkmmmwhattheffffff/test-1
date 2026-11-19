@@ -33,8 +33,8 @@ dialog{border:1px solid #e7e7e4;border-radius:8px;padding:24px;width:min(560px,c
 .breadcrumb-button{display:inline-flex;align-items:center;gap:6px;border:0;background:transparent;color:inherit;font:inherit;padding:5px 6px;border-radius:4px;min-width:0;text-align:left}.breadcrumb-button:hover,.breadcrumb-button[aria-expanded="true"]{background:var(--hover)}.breadcrumb-button.breadcrumb-workspace{color:var(--muted);flex-shrink:0}.breadcrumb-button strong{min-width:0}.breadcrumb-button>span{color:var(--muted);font-size:12px}.header-sections{position:absolute;top:calc(100% + 4px);left:20px;width:320px;max-width:calc(100vw - 40px);max-height:min(620px,calc(100dvh - 80px));overflow:auto;padding:6px;border:1px solid var(--line);border-radius:6px;background:#fff;box-shadow:0 4px 18px #00000014}.header-section-item{display:block;width:100%;border:0;border-radius:4px;background:transparent;color:var(--ink);font:inherit;font-size:13px;line-height:1.6;padding:8px 10px;text-align:left;overflow-wrap:anywhere}.header-section-item:hover,.header-section-item[aria-current="page"]{background:var(--hover)}.header-section-item:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}[data-theme="dark"] .header-sections{background:#252524}.low-vision .header-section-item{font-size:18px;min-height:44px}
 
 /* Dark Union Jack navigation */
-.sidebar{isolation:isolate;overflow-x:hidden;overflow-y:auto;background:#08152c;border-right-color:#ffffff1f;color:#fff}.sidebar::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,#061127ad,#061127cc),url("assets/union-jack.svg") center/100% 100% no-repeat;filter:blur(7px)}
-.sidebar .workspace{width:fit-content;max-width:100%;flex-shrink:0;color:#fff;gap:12px}.sidebar .workspace:hover{background:#ffffff18}.sidebar .workspace-icon{background:#fff;color:#18233a;border-color:#fff;box-shadow:2px 2px 0 #ffffff65}.sidebar .workspace strong{color:#fff;font-size:16px}.sidebar :is(.nav-item,.nav-item.active,.nav-icon,.nav-item b,.sidebar-section-label,.sidebar-course,.sidebar-course small,.privacy,.editor-entry-link){color:#fff}.sidebar .nav-item:hover{background:#ffffff1c}.sidebar .nav-item.active{background:#ffffff26;font-weight:600}.sidebar .sidebar-section-label{color:#ffffffe0}.sidebar .sidebar-course{border-color:#ffffff30}.sidebar .editor-entry-link:hover{color:#fff;background:#ffffff18}.sidebar .privacy{color:#ffffffe0}.low-vision .sidebar :is(.nav-icon,.sidebar-section-label,.sidebar-course small){color:#fff!important}.low-vision .sidebar::before{background-image:linear-gradient(#061127ed,#061127ed),url("assets/union-jack.svg")}.sidebar button:focus-visible,.sidebar a:focus-visible{outline-color:#fff}
+.sidebar{isolation:isolate;overflow-x:hidden;overflow-y:auto;background:#08152c;border-right-color:#ffffff1f;color:#fff}.sidebar::before{content:none}
+.sidebar .workspace{width:fit-content;max-width:100%;flex-shrink:0;color:#fff;gap:12px}.sidebar .workspace:hover{background:#ffffff18}.sidebar .workspace-icon{background:#fff;color:#18233a;border-color:#fff;box-shadow:2px 2px 0 #ffffff65}.sidebar .workspace strong{color:#fff;font-size:16px}.sidebar :is(.nav-item,.nav-item.active,.nav-icon,.nav-item b,.sidebar-section-label,.sidebar-course,.sidebar-course small,.privacy,.editor-entry-link){color:#fff}.sidebar .nav-item:hover{background:#ffffff1c}.sidebar .nav-item.active{background:#ffffff26;font-weight:600}.sidebar .sidebar-section-label{color:#ffffffe0}.sidebar .sidebar-course{border-color:#ffffff30}.sidebar .editor-entry-link:hover{color:#fff;background:#ffffff18}.sidebar .privacy{color:#ffffffe0}.low-vision .sidebar :is(.nav-icon,.sidebar-section-label,.sidebar-course small){color:#fff!important}.sidebar button:focus-visible,.sidebar a:focus-visible{outline-color:#fff}
 
 .exam-guide { max-width: 76ch; line-height: 1.7; }
 .exam-guide h2 { margin: 2rem 0 .75rem; }
@@ -230,4 +230,42 @@ dialog[open]::backdrop { animation: slovo-veil var(--menu) var(--ease-ui) both; 
 @media(prefers-reduced-motion: reduce) {
  *, *::before, *::after { animation: none !important; transition: none !important; }
  :where(.button,.answer,.quiz-length-option):active { transform: none; }
+}
+
+/* Neutral surfaces inspired by DesignBookmark Motion's Command button. */
+:root { --paper:#f8f8f8; --sheet:#fff; --ink:#252525; --muted:#555; --faint:#666; --line:#dedede; --hover:#ededed; --blue:#455777; --rule:#555; }
+:root[data-theme="dark"] { --paper:#191919; --sheet:#242424; --ink:#f3f3f3; --muted:#c5c5c5; --faint:#aaa; --line:#444; --hover:#333; --blue:#c1d1f5; --rule:#bbb; }
+:root.low-vision { --ink:#151515; --muted:#343434; --line:#666; }
+:root.low-vision[data-theme="dark"] { --ink:#fff; --muted:#eee; --line:#bbb; }
+.sidebar { background: rgba(26,26,26,.94); border-right-color:#ffffff20; }
+@supports (backdrop-filter: blur(12px)) {
+ .sidebar { background: rgba(26,26,26,.88); backdrop-filter: blur(12px); }
+}
+.sidebar::before, .low-vision .sidebar::before { content:none; background:none; }
+.low-vision .sidebar { background:#171717; }
+:root:not([data-theme="dark"]) .button.dark { background:#292929; border-color:#292929; }
+:root:not([data-theme="dark"]) .button.dark:hover { background:#393939; }
+.command-search { position:relative; flex:none; z-index:3; }
+.command-shell { height:36px; background:#2c2c2c; color:#f3f3f3; border-radius:8px; transform-origin:right center; }
+.command-search:not(.is-open) .command-shell:hover { background:#333; }
+.command-trigger,.command-field { display:flex; align-items:center; height:100%; gap:8px; padding:0 8px; }
+.command-trigger { border:0; background:transparent; color:inherit; border-radius:8px; white-space:nowrap; font-size:13px; }
+.command-shell svg { width:16px; height:16px; color:#ccc; }
+.command-field { width:min(300px, calc(100vw - 84px)); }
+.command-field input { flex:1; min-width:0; border:0; background:transparent; color:#fff; font-size:16px; }
+.command-field input::placeholder { color:#bbb; }
+.command-field input:focus-visible { outline-offset:1px; }
+.command-keys { display:flex; gap:4px; }
+.command-search kbd { font:500 11px/1 var(--font-family); color:#ccc; padding:4px; border-radius:4px; background:#ffffff16; }
+.command-search kbd[data-on] { color:#fff; background:#ffffff34; }
+.command-results { position:absolute; right:0; top:calc(100% + 8px); width:min(340px, calc(100vw - 28px)); padding:4px; border-radius:8px; background:var(--sheet); border:1px solid var(--line); box-shadow:0 6px 18px #0002; }
+.command-results button { width:100%; display:grid; gap:2px; text-align:left; border:0; border-radius:4px; padding:8px; background:transparent; overflow-wrap:anywhere; }
+.command-results button:hover,.command-results button:focus-visible { background:var(--hover); }
+.command-results :is(small,p) { color:var(--muted); }
+.command-results p { padding:8px; }
+@media(max-width:800px) {
+ .header-right .local-label,.command-keys { display:none; }
+ .topbar:has(.command-search.is-open) .breadcrumb { visibility:hidden; }
+ .command-search.is-open { position:absolute; right:48px; }
+ .command-results { width:min(340px, calc(100vw - 60px)); }
 }
