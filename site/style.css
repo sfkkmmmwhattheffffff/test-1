@@ -30,7 +30,7 @@ dialog{border:1px solid #e7e7e4;border-radius:8px;padding:24px;width:min(560px,c
 .editor-entry-link{display:block;font-size:11px;color:var(--muted);text-decoration:none;padding:7px 0;margin-bottom:10px}.editor-entry-link:hover{text-decoration:underline}.draft-preview-banner{position:sticky;top:46px;z-index:2;background:#f6efdE;border-top:1px solid #eee3c8;border-bottom:1px solid #eee3c8;color:#8a6b32;padding:7px 22px;font-size:11px;line-height:1.6}.cms-page-blocks{margin:30px 0;max-width:720px}.cms-page-blocks>p{font-size:15px;line-height:1.9;margin:14px 0;white-space:normal;overflow-wrap:anywhere}.cms-page-blocks>h2{font-size:25px;margin:30px 0 14px;line-height:1.4}.cms-page-blocks ul{padding-left:24px;font-size:15px;line-height:1.9}.cms-page-blocks hr{border:0;border-top:1px solid var(--line);margin:26px 0}.cms-callout{padding:18px;background:var(--sidebar);border:1px solid var(--line);border-radius:4px;line-height:1.9;margin:20px 0;font-size:14px;overflow-wrap:anywhere}.cms-page-blocks figure{margin:20px 0}.cms-page-blocks img{max-width:100%;height:auto;border-radius:4px;display:block}.cms-page-blocks figcaption{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.7}.cms-page-blocks a{text-underline-offset:4px}[data-theme="dark"] .draft-preview-banner{background:#383122;color:#e8cd97;border-color:#514630}.low-vision .cms-page-blocks :is(p,li,figcaption){font-size:20px!important;line-height:1.9!important}.low-vision .cms-callout{font-size:20px}.low-vision .draft-preview-banner{top:56px;font-size:15px}@media(max-width:800px){.draft-preview-banner{top:48px}}@media(max-width:540px){.cms-page-blocks>h2{font-size:23px}.cms-page-blocks>p,.cms-page-blocks li{font-size:14px}.draft-preview-banner{padding:7px 16px;font-size:10px}}
 
 /* Clickable breadcrumb navigation */
-.breadcrumb-button{display:inline-flex;align-items:center;gap:6px;border:0;background:transparent;color:inherit;font:inherit;padding:5px 6px;border-radius:4px;min-width:0;text-align:left}.breadcrumb-button:hover,.breadcrumb-button[aria-expanded="true"]{background:var(--hover)}.breadcrumb-button.breadcrumb-workspace{color:var(--muted);flex-shrink:0}.breadcrumb-button strong{min-width:0}.breadcrumb-button>span{color:var(--muted);font-size:12px}.header-sections{position:absolute;top:calc(100% + 4px);left:20px;width:320px;max-width:calc(100vw - 40px);max-height:min(620px,calc(100dvh - 80px));overflow:auto;padding:6px;border:1px solid var(--line);border-radius:6px;background:#fff;box-shadow:0 4px 18px #00000014}.header-section-item{display:block;width:100%;border:0;border-radius:4px;background:transparent;color:var(--ink);font:inherit;font-size:13px;line-height:1.6;padding:8px 10px;text-align:left;overflow-wrap:anywhere}.header-section-item:hover,.header-section-item[aria-current="page"]{background:var(--hover)}.header-section-item:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}[data-theme="dark"] .header-sections{background:#252524}.low-vision .header-section-item{font-size:18px;min-height:44px}
+.breadcrumb-button{display:inline-flex;align-items:center;gap:6px;border:0;background:transparent;color:inherit;font:inherit;padding:5px 6px;border-radius:4px;min-width:0;text-align:left}.breadcrumb-button:hover,.breadcrumb-button[aria-expanded="true"]{background:var(--hover)}.breadcrumb-button.breadcrumb-workspace{color:var(--muted);flex-shrink:0}.breadcrumb-button strong{min-width:0}.breadcrumb-button>span{color:var(--muted);font-size:12px}
 
 
 /* Dark Union Jack navigation */
@@ -193,9 +193,7 @@ main { transition: none; }
 :is(.search-input,.gap-entry input,.profile-form input) {
  transition: border-color var(--quick) var(--ease-ui), background-color var(--quick) var(--ease-ui);
 }
-:is(.header-sections, #chapter-words):not([hidden]) { animation: slovo-enter var(--menu) var(--ease-ui) both; }
-#header-sections-toggle > span { display: inline-block; transition: transform var(--menu) var(--ease-ui); }
-#header-sections-toggle[aria-expanded="true"] > span { transform: rotate(180deg); }
+#chapter-words:not([hidden]) { animation: slovo-enter var(--menu) var(--ease-ui) both; }
 dialog {
  border-color: var(--line); border-radius: 16px; background: var(--sheet);
  box-shadow: 0 12px 40px #0002;
@@ -404,12 +402,22 @@ dialog { padding: 24px; }
  #crumb .breadcrumb-topic-title { display: none; }
 }
 
-/* The existing sidebar is the expanding surface. */
-.sidebar[data-motion] { transform:none; transition:none; clip-path:inset(0 round 0); }
-.sidebar[data-motion][inert] { clip-path:inset(0 100% 100% 0 round 16px); pointer-events:none; }
-.sidebar-toggle-icon { position:relative; width:18px; height:18px; display:block; }
-.sidebar-toggle-icon i { position:absolute; inset:8px 2px auto; height:2px; border-radius:2px; background:currentColor; }
-.sidebar-toggle-icon i:first-child { transform:translateY(-3px); }
-.sidebar-toggle-icon i:last-child { transform:translateY(3px); }
+
+/* Dynamic Menu lives in the header and opens over the page. */
+#main-content { margin-left:0; }
+.corner-menu { position:relative; z-index:4; flex:none; --menu-width:min(300px,calc(100vw - 32px)); }
+.topbar:has(.command-search.is-open) .corner-menu { z-index:1; }
+#sidebar-toggle { position:relative; z-index:1; width:40px; height:40px; border-radius:20px; background:#262626; color:#fff; }
+#sidebar-toggle:hover { background:#333; }
+#sidebar-toggle[aria-expanded="true"] { background:transparent; }
+.sidebar-toggle-icon { position:relative; width:24px; height:24px; display:block; }
+.sidebar-toggle-icon i { position:absolute; inset:11px 3px auto; height:2px; border-radius:2px; background:currentColor; }
+.sidebar-toggle-icon i:first-child { transform:translateY(-5px); }
+.sidebar-toggle-icon i:last-child { transform:translateY(5px); }
 #sidebar-toggle[aria-expanded="true"] i:first-child { transform:rotate(45deg); }
+#sidebar-toggle[aria-expanded="true"] i:nth-child(2) { opacity:0; }
 #sidebar-toggle[aria-expanded="true"] i:last-child { transform:rotate(-45deg); }
+.corner-menu .sidebar { position:absolute; z-index:0; inset:0 auto auto 0; transform:none; transition:none; display:block; width:var(--menu-width); padding:40px 0 0; overflow:hidden; border:0; border-radius:16px; background:#262626; box-shadow:none; }
+.corner-menu .sidebar[inert] { width:40px; height:40px; visibility:hidden; pointer-events:none; border-radius:20px; }
+.corner-menu-scroll { width:var(--menu-width); max-height:calc(100dvh - 60px); overflow:auto; scrollbar-width:thin; overscroll-behavior:contain; padding:4px 8px 12px; }
+#crumb { overflow:hidden; text-overflow:ellipsis; }

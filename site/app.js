@@ -257,7 +257,7 @@ function viewVocabulary(i,backPage='vocabulary'){
 }
 function renderLibrary(kind){const list=chapters.filter(c=>c.kind===kind);$('#secondary-view').innerHTML=`<p class="route-intro">${kind==='vocab'?`${vocabulary.length} ${tr('тем','topics')} · ${vocabulary.reduce((n,c)=>n+c.tasks.length,0)} ${tr('терминов','terms')}`:'13 новых текстов по темам Quizlet и дополнительная тренировка из материалов Елизаветы. Новые тексты: 6 пропусков, без вариантов ответа.'}</p><label class="search-label" for="topic-search">Найти тему</label><input class="search-input" id="topic-search" type="search" placeholder="Название темы"><div class="topic-list" id="library-topics"></div>`;function update(){const q=$('#topic-search').value.trim().toLowerCase(),filtered=list.filter(c=>(c.title+' '+c.subtitle+' '+c.source).toLowerCase().includes(q));$('#library-topics').innerHTML=topicCards(filtered,kind==='vocab')||'<p>Темы не найдены.</p>';bindTopics()}update();$('#topic-search').oninput=update}
 const emptyPages=new Set(['grammar-trainer','mocks','forecast','path','achievements']);
-function showPage(page,keepChapter=false){closeHeaderSections();currentPage=page;if(!keepChapter)selectedChapter=null;const names={...Object.fromEntries(Object.entries(featurePages).map(([key,value])=>[key,value.ru])),russia:'Russia in English',home:'Обзор',words:'Мой словарь',vocabulary:'Лексика',formation:'Словообразование',path:'Мой маршрут',achievements:'Достижения'};$('.breadcrumb strong').textContent=names[page];$('#page-icon').textContent={...Object.fromEntries(Object.entries(featurePages).map(([key,value])=>[key,value.icon])),home:'📖',vocabulary:'📚',formation:'✏️',russia:'🇷🇺',words:'🗂️',path:'🧭',achievements:'🏅'}[page];document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.page===page));$('#home-view').hidden=page!=='home';$('#secondary-view').hidden=page==='home';$('#page-title').innerHTML=page==='home'?'Привет, это Слово — платформа для подготовки к ОГЭ по английскому языку.':names[page];
+function showPage(page,keepChapter=false){setSidebarOpen(false);currentPage=page;if(!keepChapter)selectedChapter=null;const names={...Object.fromEntries(Object.entries(featurePages).map(([key,value])=>[key,value.ru])),russia:'Russia in English',home:'Обзор',words:'Мой словарь',vocabulary:'Лексика',formation:'Словообразование',path:'Мой маршрут',achievements:'Достижения'};$('.breadcrumb strong').textContent=names[page];$('#page-icon').textContent={...Object.fromEntries(Object.entries(featurePages).map(([key,value])=>[key,value.icon])),home:'📖',vocabulary:'📚',formation:'✏️',russia:'🇷🇺',words:'🗂️',path:'🧭',achievements:'🏅'}[page];document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.page===page));$('#home-view').hidden=page!=='home';$('#secondary-view').hidden=page==='home';$('#page-title').innerHTML=page==='home'?'Привет, это Слово — платформа для подготовки к ОГЭ по английскому языку.':names[page];
 const isEmpty=emptyPages.has(page);
 if(!isEmpty){
 if(contentPage(page)&&!contentPage(page).builtin)$('#secondary-view').innerHTML='';
@@ -271,9 +271,7 @@ if(page==='achievements')$('#secondary-view').innerHTML=`<div class="achievement
 renderStats();
 applyContentPage(page);
 if(isEmpty)$('#secondary-view').innerHTML='<p data-no-translate>раздел пока пуст :(</p>';
-if(mobileSidebarOpen){mobileSidebarOpen=false;syncSidebar()}}
-let desktopSidebarOpen=true,mobileSidebarOpen=false;
-const sidebarMedia=window.matchMedia('(max-width:800px)');
+}
 // Dynamic Menu spring parameters and stagger adapted from DesignBookmark.
 const sidebar = $('#sidebar');
 const sidebarToggle = $('#sidebar-toggle');
@@ -289,46 +287,48 @@ function sidebarSpring(time, stiffness, damping){
   (Math.cos(frequency * time) + decay / frequency * Math.sin(frequency * time));
 }
 
-function updateSidebarMotion(open){
- sidebar.dataset.motion = '';
+function setSidebarOpen(open){
  if (sidebarWasOpen === open) return;
  const animate = sidebarWasOpen !== undefined && !sidebarReducedMotion.matches;
- const currentClip = getComputedStyle(sidebar).clipPath;
- const inset = currentClip.slice(6).split(' round ')[0].split(' ').map(parseFloat);
- const startWidth = inset[1] ?? inset[0] ?? 0;
- const startHeight = inset[2] ?? inset[0] ?? 0;
+ const {width, height} = sidebar.getBoundingClientRect();
+ const startRadius = parseFloat(getComputedStyle(sidebar).borderTopLeftRadius);
  const rows = sidebarRows.map(row => ({
   row, opacity:row.getAnimations().length ? Number(getComputedStyle(row).opacity) : Number(sidebarWasOpen),
  }));
  const lineTransforms = sidebarLines.map(line => getComputedStyle(line).transform);
+ const middleOpacity = getComputedStyle(sidebarLines[1]).opacity;
  for (const element of [sidebar, ...sidebarRows, ...sidebarLines]) {
   element.getAnimations().forEach(animation => animation.cancel());
  }
  sidebarWasOpen = open;
  sidebar.inert = !open;
  sidebarToggle.setAttribute('aria-expanded', String(open));
+ sidebarToggle.setAttribute('aria-label', open ? tr('Закрыть меню','Close menu') : tr('Открыть меню','Open menu'));
  if (!animate) return;
 
- const target = open ? 0 : 100;
- const clip = Array.from({length:49}, (_, frame) => {
+ const targetWidth = sidebar.offsetWidth;
+ const targetHeight = sidebar.offsetHeight;
+ const frames = Array.from({length:49}, (_, frame) => {
   const time = frame / 60;
-  const width = Math.max(0, startWidth + (target - startWidth) * sidebarSpring(time, 320, 26));
-  const height = Math.max(0, startHeight + (target - startHeight) * sidebarSpring(time, 240, 22));
-  return {clipPath:'inset(0 ' + width + '% ' + height + '% 0 round ' + (16 * height / 100) + 'px)'};
+  const wide = width + (targetWidth - width) * sidebarSpring(time, 320, 26);
+  const tall = height + (targetHeight - height) * sidebarSpring(time, 240, 22);
+  const radius = startRadius + ((open ? 16 : 20) - startRadius) * sidebarSpring(time, 380, 24);
+  return {width:Math.max(40, wide) + 'px', height:Math.max(40, tall) + 'px', borderRadius:radius + 'px', visibility:'visible'};
  });
- sidebar.animate(clip, {duration:800});
- sidebarLines.forEach((line, index) => {
+ sidebar.animate(frames, {duration:800});
+ sidebarLines[1].animate([{opacity:middleOpacity},{opacity:open ? 0 : 1}], {duration:150});
+ for (const index of [0, 2]) {
   const direction = index === 0 ? 1 : -1;
   const matrix = new DOMMatrixReadOnly(lineTransforms[index]);
   const angle = Math.atan2(matrix.b, matrix.a) * 180 / Math.PI;
   const frames = Array.from({length:31}, (_, frame) => {
    const progress = sidebarSpring(frame / 60, 380, 24);
-   const translate = matrix.f + ((open ? 0 : -3 * direction) - matrix.f) * progress;
+   const translate = matrix.f + ((open ? 0 : -5 * direction) - matrix.f) * progress;
    const rotation = angle + ((open ? 45 * direction : 0) - angle) * progress;
    return {transform:'translateY(' + translate + 'px) rotate(' + rotation + 'deg)'};
   });
-  line.animate(frames, {duration:500});
- });
+  sidebarLines[index].animate(frames, {duration:500});
+ }
 
  // Stagger visible rows. Rows farther down the scrollable panel settle together.
  const staggerCount = Math.min(rows.length, 9);
@@ -350,17 +350,22 @@ sidebarReducedMotion.addEventListener('change', () => {
   element.getAnimations().forEach(animation => animation.cancel());
  }
 });
-function syncSidebar(){const open=sidebarMedia.matches?mobileSidebarOpen:desktopSidebarOpen;document.body.classList.toggle('sidebar-open',sidebarMedia.matches&&open);document.body.classList.toggle('sidebar-collapsed',!sidebarMedia.matches&&!open);updateSidebarMotion(open);$('#sidebar-toggle').setAttribute('aria-label',open?'Скрыть меню':'Открыть меню');$('#sidebar-backdrop').hidden=!sidebarMedia.matches||!open}
-$('#sidebar-toggle').onclick=()=>{closeHeaderSections();if(sidebarMedia.matches)mobileSidebarOpen=!mobileSidebarOpen;else desktopSidebarOpen=!desktopSidebarOpen;syncSidebar()};
-$('#sidebar-backdrop').onclick=()=>{mobileSidebarOpen=false;syncSidebar();$('#sidebar-toggle').focus()};
-sidebarMedia.addEventListener('change',()=>{mobileSidebarOpen=false;syncSidebar()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&mobileSidebarOpen&&!$('#trainer').open&&!$('#info').open){mobileSidebarOpen=false;syncSidebar();$('#sidebar-toggle').focus()}});
-function closeHeaderSections(restoreFocus=false){$('#header-sections').hidden=true;$('#header-sections-toggle').setAttribute('aria-expanded','false');if(restoreFocus)$('#header-sections-toggle').focus()}
-$('#header-home').onclick=()=>showPage('home');
-$('#header-sections-toggle').onclick=()=>{const menu=$('#header-sections');if(!menu.hidden){closeHeaderSections();return}menu.replaceChildren();document.querySelectorAll('#sidebar .nav-item[data-page]').forEach(source=>{const button=document.createElement('button');button.type='button';button.className='header-section-item';button.textContent=source.querySelector('.nav-name').textContent;if(source.dataset.page===currentPage)button.setAttribute('aria-current','page');button.onclick=()=>{showPage(source.dataset.page);$('#main-content').focus()};menu.append(button)});menu.hidden=false;$('#header-sections-toggle').setAttribute('aria-expanded','true')};
-document.addEventListener('click',e=>{if(!e.target.closest('#header-sections,#header-sections-toggle'))closeHeaderSections()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#header-sections').hidden){e.preventDefault();closeHeaderSections(true)}});
-$('#workspace-home').onclick=()=>showPage('home');syncSidebar();
+sidebarToggle.onclick = () => setSidebarOpen(!sidebarWasOpen);
+$('#header-home').onclick = () => showPage('home');
+$('#command-search').addEventListener('focusin', () => setSidebarOpen(false));
+document.addEventListener('click', event => {
+ if (!event.target.closest('.corner-menu')) setSidebarOpen(false);
+});
+document.addEventListener('keydown', event => {
+ if (event.key !== 'Escape' || !sidebarWasOpen || event.defaultPrevented || document.querySelector('dialog[open]')) return;
+ event.preventDefault();
+ setSidebarOpen(false);
+ sidebarToggle.focus();
+});
+sidebar.addEventListener('click', event => {
+ if (event.target.closest('[data-page], #workspace-home')) sidebarToggle.focus();
+});
+$('#workspace-home').onclick=()=>showPage('home');setSidebarOpen(false);
 document.querySelectorAll('[data-page],[data-open-page]').forEach(b=>b.onclick=()=>showPage(b.dataset.page||b.dataset.openPage));$('#close-trainer').onclick=closeTraining;$('#trainer').addEventListener('cancel',event=>{event.preventDefault();closeTraining()});$('#help').onclick=()=>$('#info').showModal();$('.close-info').onclick=()=>$('#info').close();$('#reset').onclick=()=>{state={learned:[],dates:[],practice:{}};save();showPage(currentPage);$('#reset-status').textContent='Прогресс ОГЭ сброшен.'};showPage(previewInitialPage());
 if(SlovoContent.preview){const lessonId=new URLSearchParams(location.search).get('lesson');const i=chapters.findIndex(c=>c.id===lessonId);if(i>=0){if(chapters[i].kind==='vocab')viewVocabulary(i);else start(i)}}
 startInterfaceTranslation();
