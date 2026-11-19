@@ -420,3 +420,40 @@ dialog { padding: 24px; }
 .corner-menu .sidebar[inert] { width:var(--header-control-size); height:var(--header-control-size); visibility:hidden; pointer-events:none; border-radius:20px; }
 .corner-menu-scroll { width:var(--menu-width); max-height:calc(100dvh - 2 * var(--header-inset) - var(--header-control-size)); overflow:auto; scrollbar-width:thin; overscroll-behavior:contain; padding:4px 8px 12px; }
 #crumb { overflow:hidden; text-overflow:ellipsis; }
+
+/* Toggle Switch from DesignBookmark. */
+.settings-toggles {
+ --switch-on:#34d17a;
+ --switch-off:rgba(23,24,26,.12);
+ max-width:440px;
+ padding:6px 16px;
+ border-radius:24px;
+ background:#f7f7f6;
+}
+[data-theme="dark"] .settings-toggles { --switch-off:rgba(255,255,255,.14); background:#262626; }
+.settings-toggles .setting-row { align-items:center; gap:12px; min-height:60px; padding:8px 0; border:0; }
+.settings-toggles .setting-name { font-size:15px; font-weight:500; }
+.low-vision .settings-toggles .setting-name { font-size:18px; }
+.setting-control { display:flex; flex:none; align-items:center; gap:8px; }
+.setting-options { font-size:12px; color:var(--muted); text-align:right; }
+.setting-control:has(input:not(:checked)) .setting-options span:first-child,
+.setting-control:has(input:checked) .setting-options span:last-child { color:var(--ink); font-weight:600; }
+.settings-toggles .setting-toggle { position:relative; flex:none; display:block; width:52px; height:32px; }
+.setting-toggle input { position:absolute; inset:0; width:100%; height:100%; margin:0; opacity:0; cursor:pointer; }
+.setting-track { position:absolute; inset:0; border-radius:16px; background:var(--switch-off); pointer-events:none; }
+.setting-track i { position:absolute; top:3px; left:3px; width:26px; height:26px; border-radius:13px; background:#fff; }
+.setting-toggle input:checked + .setting-track { background:var(--switch-on); }
+.setting-toggle input:checked + .setting-track i { transform:translateX(20px); }
+.setting-toggle input:focus-visible + .setting-track { outline:2px solid var(--blue); outline-offset:3px; }
+@media(max-width:480px) {
+ .setting-control { flex-direction:column-reverse; align-items:flex-end; gap:2px; }
+}
+
+/* Marker Text from Kokonut UI. */
+.marker-text { display:block; position:relative; isolation:isolate; white-space:pre-line; }
+.marker-text [data-mark] { color:inherit; background:transparent; text-decoration:none; }
+.marker-text :is([data-mark="circle"],[data-mark="box"]) { white-space:nowrap; }
+.marker-ink { position:absolute; left:0; top:0; overflow:visible; pointer-events:none; }
+.marker-ink-under { z-index:-1; }
+.marker-ink-over { z-index:10; }
+.vocab-context { margin:6px 0 0; }
