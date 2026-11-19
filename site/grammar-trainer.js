@@ -74,7 +74,7 @@ function grammarLessonView(lesson,body){
  const exercise=$('#exercise');
  $('#trainer').classList.remove('wide-trainer');
  $('#session-label').textContent=tr('ГРАММАТИКА','GRAMMAR')+' · '+lesson.id;
- $('#session-progress').style.width='0%';
+ setSessionProgress(0);
  session={mode:'grammar-course'};
  exercise.innerHTML=`<article class="grammar-lesson">
   <button type="button" class="button light grammar-fullscreen" aria-pressed="false"></button>
@@ -175,7 +175,7 @@ function renderGrammarPractice(lesson,selected){
     correct?tr('✓ Верно','✓ Correct'):tr('Правильный ответ: ','Correct answer: ')+question.answers[0];
   }
   form.querySelector('button').disabled=true;
-  $('#session-progress').style.width='100%';
+  setSessionProgress(1);
   $('#grammar-result').innerHTML=`<p>${tr('Верных ответов: ','Correct answers: ')}${score} / ${inputs.length}</p>
    <button type="button" class="button light" id="grammar-retry">${tr('Попробовать ещё раз','Try again')}</button>`;
   $('#grammar-retry').onclick=()=>renderGrammarPractice(lesson,selected);

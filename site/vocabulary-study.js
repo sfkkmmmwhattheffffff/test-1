@@ -13,7 +13,7 @@ function showVocabularyStudy(topic, title, markup, progress=0) {
  $('#trainer').classList.remove('wide-trainer');
  const chapter=chapters[topic];
  $('#session-label').textContent=title?title+' · '+(preferences.language==='en'&&chapter.titleEn?chapter.titleEn:chapter.title):'';
- $('#session-progress').style.width=progress+'%';
+ setSessionProgress(progress/100);
  $('#exercise').innerHTML=markup;
  if(!$('#trainer').open)$('#trainer').showModal();
 }
