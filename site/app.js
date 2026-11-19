@@ -366,7 +366,7 @@ sidebar.addEventListener('click', event => {
  if (event.target.closest('[data-page], #workspace-home')) sidebarToggle.focus();
 });
 $('#workspace-home').onclick=()=>showPage('home');setSidebarOpen(false);
-document.querySelectorAll('[data-page],[data-open-page]').forEach(b=>b.onclick=()=>showPage(b.dataset.page||b.dataset.openPage));$('#close-trainer').onclick=closeTraining;$('#trainer').addEventListener('cancel',event=>{event.preventDefault();closeTraining()});$('#help').onclick=()=>$('#info').showModal();$('.close-info').onclick=()=>$('#info').close();$('#reset').onclick=()=>{state={learned:[],dates:[],practice:{}};save();showPage(currentPage);$('#reset-status').textContent='Прогресс ОГЭ сброшен.'};showPage(previewInitialPage());
+document.querySelectorAll('[data-page],[data-open-page]').forEach(b=>b.onclick=()=>showPage(b.dataset.page||b.dataset.openPage));$('#close-trainer').onclick=closeTraining;$('#trainer').addEventListener('cancel',event=>{event.preventDefault();closeTraining()});showPage(previewInitialPage());
 if(SlovoContent.preview){const lessonId=new URLSearchParams(location.search).get('lesson');const i=chapters.findIndex(c=>c.id===lessonId);if(i>=0){if(chapters[i].kind==='vocab')viewVocabulary(i);else start(i)}}
 startInterfaceTranslation();
 
