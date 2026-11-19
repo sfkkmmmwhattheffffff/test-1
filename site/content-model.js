@@ -1,13 +1,23 @@
 /* Draft documents contain site content only, never student progress or credentials. */
 (function(){
  const KEY='slovo-site-draft-v1',copy=x=>JSON.parse(JSON.stringify(x));
+ const catalogueLabels = new Map([
+  ['Словообразование · связный текст · 6 пропусков','Словообразование (6 пропусков в связном тексте)'],
+  ['Авторская тренировка · 10 пропусков','Авторская тренировка (10 пропусков)'],
+  ['6 текстов · 7 вопросов · 1 лишний','6 текстов и 7 вопросов (один лишний)'],
+  ['Чтение · True / False / Not stated · 7 утверждений','Чтение True / False / Not stated (7 утверждений)'],
+ ]);
+ for (const lesson of chapters) {
+  lesson.subtitle = catalogueLabels.get(lesson.subtitle) ?? lesson.subtitle.replace(/ · 6, 50 или весь набор$/, '');
+  lesson.source = lesson.source.replace(/^Quizlet · @antoxaenglish · (.+?) \(\d+\/14\)\./, 'Quizlet (@antoxaenglish, $1).');
+ }
  const baseLessons=copy(chapters);
  const pageRows=[
  ['home','Обзор','Overview','Привет, это Слово — платформа для подготовки к ОГЭ по английскому языку.','Hi, this is Slovo — a platform for preparing for the OGE English exam.','Лексика, практика и материалы — всё в одном месте. Здесь начинается твоё занятие.','Vocabulary, practice and resources in one place. Start your study session here.','📖','study'],
  ['vocabulary','Лексика','Vocabulary','Лексика','Vocabulary','Твой словарь @antoxaenglish. Выбирай тему и длину тренировки.','Your @antoxaenglish vocabulary. Choose a topic and session length.','📚','practice'],
  ['formation','Словообразование','Word formation','Словообразование','Word formation','Связные тексты с шестью пропусками и разбором ответов.','Connected texts with six gaps and answer explanations.','✏️','study'],
  ['russia','Russia in English','Russia in English','Russia in English','Russia in English','Россия и русская культура на английском языке.','Russia and Russian culture in English.','🇷🇺','study'],
- ['exam','Всё об экзамене','About the exam','Всё об экзамене','About the exam','ОГЭ по английскому языку · 2027','OGE English exam · 2027','📄','study'],
+ ['exam','Всё об экзамене','About the exam','Всё об экзамене','About the exam','ОГЭ по английскому языку (2027)','OGE English exam (2027)','📄','study'],
  ['words','Мой словарь','My vocabulary','Мой словарь','My vocabulary','Слова из твоих тренировок.','Words from your practice.','🗂️','study'],
  ['path','Мой маршрут','My learning path','Мой маршрут','My learning path','Выбирай раздел и продолжай практику.','Choose a section and keep practising.','🧭','study'],
  ['achievements','Достижения','Achievements','Достижения','Achievements','Замечай регулярную практику.','Notice your regular practice.','🏅','study'],

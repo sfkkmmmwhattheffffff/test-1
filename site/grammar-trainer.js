@@ -47,11 +47,11 @@ function grammarTrainerPage(){
    if(!lessons.length)return '';
    total+=lessons.length;
    const title=tr(chapter.title,chapter.titleEn);
-   const number=/^\d+$/.test(chapter.id)?tr('Глава ','Chapter ')+chapter.id+' · ':'';
+   const number=/^\d+$/.test(chapter.id)?tr('Глава ','Chapter ')+chapter.id+' ':'';
    return `<details class="grammar-chapter" ${query?'open':''}>
      <summary>${esc(number+title)} <small>${lessons.length}</small></summary>
      <div class="grammar-lessons">${lessons.map(lesson=>`<button type="button" class="trainer-choice" data-grammar-lesson="${lesson.id}">
-      <span class="trainer-choice-body"><strong>${esc(lesson.title)}</strong><small>${lesson.id} · ${tr('с.','p.')} ${lesson.page}</small></span>
+      <span class="trainer-choice-body"><strong>${esc(lesson.title)}</strong><small>${lesson.id} (${tr('с.','p.')} ${lesson.page})</small></span>
       <span aria-hidden="true">→</span>
      </button>`).join('')}</div>
     </details>`;
@@ -73,7 +73,7 @@ function grammarTrainerPage(){
 function grammarLessonView(lesson,body){
  const exercise=$('#exercise');
  $('#trainer').classList.remove('wide-trainer');
- $('#session-label').textContent=tr('ГРАММАТИКА','GRAMMAR')+' · '+lesson.id;
+ $('#session-label').textContent=tr('ГРАММАТИКА','GRAMMAR')+' ('+lesson.id+')';
  setSessionProgress(0);
  session={mode:'grammar-course'};
  exercise.innerHTML=`<article class="grammar-lesson">
@@ -100,12 +100,12 @@ document.getElementById('trainer').addEventListener('close',event=>event.current
 
 function renderGrammarLesson(lesson){
  const pdfPage=Number(lesson.page)+13;
- const title=tr('Оригинал учебника','Original textbook')+' · '+tr('с. ','p. ')+lesson.page;
+ const title=tr('Оригинал учебника','Original textbook')+' ('+tr('с. ','p. ')+lesson.page+')';
  const pdfUrl=grammarBookUrl&&grammarBookUrl+'#page='+pdfPage;
  const exercise=grammarLessonView(lesson,`
   <h2 tabindex="-1">${esc(lesson.title)}</h2>
   <h3>${tr('Теория','Theory')}</h3>
-  <p class="source-note">${tr('Таблица','Chart')} ${lesson.id} · ${tr('с.','p.')} ${lesson.page}</p>
+  <p class="source-note">${tr('Таблица','Chart')} ${lesson.id} (${tr('с.','p.')} ${lesson.page})</p>
   ${pdfUrl?`<p><a href="${esc(pdfUrl)}" target="_blank" rel="noopener">${esc(title)} ↗</a></p>
    <iframe class="grammar-book-frame" title="${esc(title)}" src="${esc(pdfUrl)}"></iframe>`:`
    <p>${tr('Открой PDF, чтобы прочитать полное объяснение и примеры в оригинале.','Open the PDF to read the complete explanation and original examples.')}</p>
@@ -124,7 +124,7 @@ function renderGrammarLesson(lesson){
    train.setAttribute('aria-expanded','false');
    return;
   }
-  menu.innerHTML=`<button type="button" class="button light" data-grammar-practice="all">${tr('Все задания блока','All exercises in this block')} · ${lesson.questions.length}</button>
+  menu.innerHTML=`<button type="button" class="button light" data-grammar-practice="all">${tr('Все задания блока','All exercises in this block')} (${lesson.questions.length})</button>
    ${lesson.questions.map((question,index)=>`<button type="button" class="trainer-choice" data-grammar-practice="${index}">
     <span class="trainer-choice-body"><strong>${tr('Задание','Exercise')} ${index+1}</strong><span lang="en" data-no-translate>${esc(question.prompt)}</span>
     ${question.reference?`<small>${esc(question.reference)}</small>`:''}</span><span aria-hidden="true">→</span>
@@ -146,7 +146,7 @@ function renderGrammarPractice(lesson,selected){
   <h2 tabindex="-1">${esc(lesson.title)}</h2>
   <form id="grammar-form">
    ${questions.map((question,index)=>`<div class="grammar-question">
-    <small>${tr('Задание','Exercise')} ${(selected??index)+1}${question.reference?' · '+esc(question.reference):''}</small>
+    <small>${tr('Задание','Exercise')} ${(selected??index)+1}${question.reference?' ('+esc(question.reference)+')':''}</small>
     <label for="grammar-answer-${index}" lang="en" data-no-translate>${esc(question.prompt)}</label>
     <input class="search-input" id="grammar-answer-${index}" name="answer-${index}" lang="en" spellcheck="false" autocomplete="off" required>
     <p class="grammar-feedback" aria-live="polite"></p>

@@ -160,16 +160,16 @@ const grammarSource = `
 14-8|387|Прямая и косвенная речь|Косвенная речь передаёт содержание высказывания без кавычек. Меняются местоимения и при необходимости указатели времени и места.|Mia said, “I am busy.” → Mia said that ___ was busy.|she
 14-9|388|Согласование времён в косвенной речи|После прошедшего глагола сообщения настоящее часто переходит в прошедшее, а will — в would. Если факт по-прежнему актуален, исходное время иногда сохраняется.|Leo said, “I will help.” → Leo said he ___ help. (backshift)|would
 14-10|389|Tell, ask, answer и reply|Tell обычно требует адресата: tell me. Ask вводит вопрос или просьбу; answer может брать прямое дополнение, reply — дополнение с to.|She told ___ that the class was cancelled. (I)|me
-#A|Приложение A · времена и that-clauses|Appendix A · tenses and that-clauses
+#A|Приложение A (времена и that-clauses)|Appendix A (tenses and that-clauses)
 A-1|395|Present Perfect и Past Perfect|Present Perfect соотносит событие с настоящим; Past Perfect — с другой точкой в прошлом.|By the time I got there, they ___ already left.|had
 A-2|396|Past Continuous и Past Perfect|Past Continuous показывает процесс в тот момент, Past Perfect — то, что завершилось к нему.|When the bell rang, we were ___ lunch. (have)|having
 A-3|396|Still и anymore|Still показывает продолжение. Anymore или any more в отрицании обозначает, что прежнее состояние прекратилось.|I don't live there ___ now. (anymore / still)|anymore|any more
 A-4|397|Другие глаголы с that-clauses|Глаголы вроде admit, explain, notice и promise могут вводить сообщение или мысль через that.|He admitted ___ he had lost the key. Use a conjunction.|that
 A-5|397|Be + выражение + that-clause|Be sure, be relieved, be aware и сходные выражения могут иметь that-clause, раскрывающее содержание уверенности, реакции или знания.|We're relieved ___ everyone is safe. Use a conjunction.|that
-#B|Приложение B · фразовые глаголы|Appendix B · phrasal verbs
+#B|Приложение B (фразовые глаголы)|Appendix B (phrasal verbs)
 B-1|398|Порядок слов во фразовых глаголах|У разделяемых глаголов существительное может стоять до или после частицы. Объектное местоимение ставится между глаголом и частицей: turn it off.|The radio is loud. Please turn ___ down. (the radio → pronoun)|it
 B-2|399|Справочник фразовых глаголов|Значение часто приходится запоминать целиком: give up — бросить занятие, put off — отложить, look after — присматривать. У look after дополнение следует за after.|Can you look ___ my dog on Friday? (присмотреть)|after
-#C|Приложение C · сочетания с предлогами|Appendix C · preposition combinations
+#C|Приложение C (сочетания с предлогами)|Appendix C (preposition combinations)
 C-1|402|Управление предлогами|Прилагательные и глаголы могут требовать определённого предлога: good at, rely on, interested in. После предлога возможны существительное или V-ing.|He's interested ___ learning photography.|in
 C-2|402|Справочник сочетаний с предлогами|Запоминайте предлог вместе со словом: afraid of, proud of, responsible for, depend on и apologize for.|She's responsible ___ booking the room.|for
 `;

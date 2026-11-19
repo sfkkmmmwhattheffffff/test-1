@@ -12,7 +12,7 @@ const vocabularyModeName = mode => tr(...vocabularyModes[mode].slice(0, 2));
 function showVocabularyStudy(topic, title, markup, progress=0) {
  $('#trainer').classList.remove('wide-trainer');
  const chapter=chapters[topic];
- $('#session-label').textContent=title?title+' · '+(preferences.language==='en'&&chapter.titleEn?chapter.titleEn:chapter.title):'';
+ $('#session-label').textContent=title?title+' ('+(preferences.language==='en'&&chapter.titleEn?chapter.titleEn:chapter.title)+')':'';
  setSessionProgress(progress/100);
  $('#exercise').innerHTML=markup;
  if(!$('#trainer').open)$('#trainer').showModal();
@@ -199,7 +199,7 @@ function finishVocabularyStudy(){
  showVocabularyStudy(topic,vocabularyModeName(mode),`<h2>${tr('Тренировка завершена','Session complete')}</h2>
   <p>${score} / ${tasks.length} ${tr('слов','words')}</p>${detail}
   ${results.some(result=>!result.correct)?`<details><summary>${tr('Разобрать ошибки','Review mistakes')}</summary>
-   <ul>${results.filter(result=>!result.correct).map(result=>`<li data-no-translate>${esc(result.task.prompt)} · ${esc(result.value)} → <strong>${esc(result.expected)}</strong></li>`).join('')}</ul></details>`:''}
+   <ul>${results.filter(result=>!result.correct).map(result=>`<li data-no-translate>${esc(result.task.prompt)} (${esc(result.value)}) → <strong>${esc(result.expected)}</strong></li>`).join('')}</ul></details>`:''}
   <button class="button dark" id="study-return">${tr('К режимам изучения','Study modes')}</button>`,100);
  $('#study-return').onclick=()=>openVocabularyModes(topic);
  $('#study-return').focus();
