@@ -250,7 +250,7 @@ dialog[open]::backdrop { animation: slovo-veil var(--menu) var(--ease-ui) both; 
 .command-shell:focus-within:has(:focus-visible) { outline:2px solid var(--muted); outline-offset:2px; }
 .command-search:not(.is-open) .command-shell:hover { background:#333; }
 .command-trigger,.command-field { display:flex; align-items:center; height:100%; }
-.command-trigger { width:max-content; gap:12px; padding:0 10px 0 16px; border:0; background:transparent; color:inherit; white-space:nowrap; font-size:14px; font-weight:500; }
+.command-trigger { --font-family:"SF Pro Text","SF Pro",-apple-system,BlinkMacSystemFont,system-ui,sans-serif; font-family:var(--font-family); width:max-content; gap:12px; padding:0 10px 0 16px; border:0; background:transparent; color:inherit; white-space:nowrap; font-size:14px; font-weight:500; }
 .command-trigger svg { display:none; }
 .command-shell svg { width:16px; height:16px; flex:none; color:rgba(255,255,255,.5); }
 .command-field { gap:10px; padding:0 10px 0 14px; width:min(300px, calc(100vw - 84px)); }
