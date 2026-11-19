@@ -12,7 +12,7 @@ const vocabularyModeName = mode => tr(...vocabularyModes[mode].slice(0, 2));
 function showVocabularyStudy(topic, title, markup, progress=0) {
  $('#trainer').classList.remove('wide-trainer');
  const chapter=chapters[topic];
- $('#session-label').textContent=title+' · '+(preferences.language==='en'&&chapter.titleEn?chapter.titleEn:chapter.title);
+ $('#session-label').textContent=title?title+' · '+(preferences.language==='en'&&chapter.titleEn?chapter.titleEn:chapter.title):'';
  $('#session-progress').style.width=progress+'%';
  $('#exercise').innerHTML=markup;
  if(!$('#trainer').open)$('#trainer').showModal();
@@ -77,10 +77,13 @@ function renderVocabularyQuestion(){
   typed?tr('Введи слово по-английски','Type the English term'):tr('Выбери перевод','Choose the translation');
  const options=shuffle([task.answer,...shuffle([...new Set(chapters[topic].tasks.map(t=>t.answer))].filter(answer=>answer!==task.answer)).slice(0,3)]);
  const count=mode==='learn'?mastered.size:index;
- showVocabularyStudy(topic,vocabularyModeName(mode),`
-  <div class="exercise-word">
-   <p>${count} / ${tasks.length}</p><h2>${instruction}</h2>
-   ${spelling?`<button class="button light" id="study-speak" type="button">${tr('Прослушать','Play audio')}</button><p id="study-audio-status" role="status"></p>`:`<p data-no-translate>${esc(typed?task.answer:task.prompt)}</p>`}
+ const learn=mode==='learn';
+ showVocabularyStudy(topic,learn?'':vocabularyModeName(mode),`
+  <div class="exercise-word${learn?' learn-question':''}">
+   <p aria-live="polite">${count} / ${tasks.length}${learn?' '+tr('выучено','learnt'):''}</p>
+   ${learn?`<h2 lang="${typed?'ru':'en'}" data-no-translate>${esc(typed?task.answer:task.prompt)}</h2><p>${instruction}</p>`:`
+    <h2>${instruction}</h2>
+    ${spelling?`<button class="button light" id="study-speak" type="button">${tr('Прослушать','Play audio')}</button><p id="study-audio-status" role="status"></p>`:`<p data-no-translate>${esc(typed?task.answer:task.prompt)}</p>`}`}
    ${typed?`<form id="study-form"><input class="search-input" id="study-input" lang="en" aria-label="${instruction}" autocomplete="off" autocapitalize="none" spellcheck="false" required>
    <button class="button dark">${tr('Ответить','Answer')}</button></form>`:
    `<div class="study-answers">${options.map(option=>`<button class="answer" type="button" data-study-answer data-no-translate>${esc(option)}</button>`).join('')}</div>`}

@@ -114,3 +114,17 @@ dialog{border:1px solid #e7e7e4;border-radius:8px;padding:24px;width:min(560px,c
 .grammar-fullscreen { margin-block: .5rem 1rem; }
 #trainer.grammar-expanded { inset: 0; margin: 0; width: 100%; max-width: none; height: 100dvh; max-height: none; border-radius: 0; }
 #trainer.grammar-expanded :is(.modal-head,.session-track,#exercise) { width: 100%; max-width: 65rem; margin-inline: auto; }
+
+#trainer:has(.learn-question) .modal-head { justify-content: flex-end; }
+#trainer:has(.learn-question) :is(#session-label,.session-track) { display: none; }
+.learn-question > p { margin: .35rem 0 .85rem; }
+.flashcard-ratings { display: flex; justify-content: center; flex-wrap: wrap; gap: .65rem; margin: .8rem 0 .45rem; }
+.flashcard-ratings .button { min-height: 44px; }
+#flashcard-unknown span { color: #ba3939; }
+#flashcard-known span { color: #25834f; }
+[data-theme="dark"] #flashcard-unknown span { color: #ff9b9b; }
+[data-theme="dark"] #flashcard-known span { color: #8de4aa; }
+.flashcard-tally { color: var(--muted); text-align: center; font-size: .8rem; }
+.flashcard-group { border-bottom: 1px solid var(--line); padding: .6rem 0; }
+.flashcard-group summary { cursor: pointer; }
+.flashcard-group ul { padding-inline-start: 1.5rem; overflow-wrap: anywhere; }

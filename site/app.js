@@ -102,10 +102,99 @@ function start(topic=0,review=false,size=defaultVocabularyBatch){const c=chapter
 const normalise=s=>s.toLowerCase().replace(/[\s'’]/g,'').trim();
 const wordForm=s=>s.trim().toLowerCase();
 function isCorrect(t,value,c){const clean=c.kind==='formation'?wordForm:normalise;return(t.accepted||[t.answer]).some(a=>clean(value)===clean(a))}
-function startFlashcards(topic){session={mode:'flashcards',topic,tasks:[...chapters[topic].tasks],index:0,flipped:false,reversed:false,shuffled:false};if(!$('#trainer').open)$('#trainer').showModal();renderFlashcard();$('#flip-card').focus()}
-function moveFlashcard(direction){const next=session.index+direction;if(next<0||next>=session.tasks.length)return;session.index=next;session.flipped=false;renderFlashcard();$('#flip-card').focus()}
-function renderFlashcard(){const c=chapters[session.topic],t=session.tasks[session.index];const showTranslation=session.reversed!==session.flipped;$('#session-label').textContent=`КАРТОЧКИ · ${c.title.toUpperCase()}`;$('#session-progress').style.width=(session.index+1)/session.tasks.length*100+'%';$('#exercise').innerHTML=`<div class="flashcard-top"><span class="eyebrow">УЧИ В СВОЁМ ТЕМПЕ</span><span id="flashcard-count" aria-live="polite">${session.index+1} / ${session.tasks.length}</span></div><button class="flashcard" id="flip-card" aria-label="Перевернуть карточку" aria-pressed="${session.flipped}"><span class="eyebrow">${showTranslation?'РУССКИЙ':'ENGLISH'}</span><span class="flashcard-text" lang="${showTranslation?'ru':'en'}">${esc(showTranslation?t.answer:t.prompt)}</span><span class="flashcard-hint">Нажми, чтобы ${session.flipped?'вернуться':'увидеть обратную сторону'} ↻</span></button><div class="flashcard-navigation"><button class="button light" id="flashcard-prev" aria-label="Предыдущая карточка" ${session.index===0?'disabled':''}>←</button><span>← → листать · пробел перевернуть</span><button class="button light" id="flashcard-next" aria-label="Следующая карточка" ${session.index===session.tasks.length-1?'disabled':''}>→</button></div><div class="flashcard-options"><button class="text-button" id="flashcard-shuffle" aria-pressed="${session.shuffled}">Перемешать: ${session.shuffled?'вкл.':'выкл.'}</button><button class="text-button" id="flashcard-direction">Сначала ${session.reversed?'русский':'английский'} ↔</button></div><p class="source-note">Просмотр карточек не начисляет XP. Проверь знания в режиме «Проверить себя».</p><button class="button dark" id="flashcard-check">Проверить себя →</button>`;
-$('#flip-card').onclick=()=>{session.flipped=!session.flipped;renderFlashcard();$('#flip-card').focus()};$('#flashcard-prev').onclick=()=>moveFlashcard(-1);$('#flashcard-next').onclick=()=>moveFlashcard(1);$('#flashcard-direction').onclick=()=>{session.reversed=!session.reversed;session.flipped=false;renderFlashcard()};$('#flashcard-shuffle').onclick=()=>{session.shuffled=!session.shuffled;session.tasks=session.shuffled?shuffle(c.tasks):[...c.tasks];session.index=0;session.flipped=false;renderFlashcard()};$('#flashcard-check').onclick=()=>chooseQuizLength(session.topic)}
+function startFlashcards(topic){
+ const deck=[...chapters[topic].tasks];
+ session={mode:'flashcards',topic,deck,tasks:deck,index:0,flipped:false,reversed:false,shuffled:false,ratings:new Map(),ratedThisRound:new Set(),round:1};
+ if(!$('#trainer').open)$('#trainer').showModal();
+ renderFlashcard();
+}
+function moveFlashcard(direction){
+ const next=session.index+direction;
+ if(next<0||next>=session.tasks.length)return;
+ session.index=next;
+ session.flipped=false;
+ renderFlashcard();
+}
+function rateFlashcard(known){
+ const {tasks,index,ratings,ratedThisRound}=session;
+ const task=tasks[index];
+ ratings.set(task.id,known);
+ ratedThisRound.add(task.id);
+ const next=tasks.findIndex((item,i)=>i>index&&!ratedThisRound.has(item.id));
+ const remaining=next<0?tasks.findIndex(item=>!ratedThisRound.has(item.id)):next;
+ if(remaining<0){finishFlashcardRound();return}
+ session.index=remaining;
+ session.flipped=false;
+ renderFlashcard();
+}
+function finishFlashcardRound(){
+ const {deck,ratings,round,topic}=session;
+ session.mode='flashcards-results';
+ const known=deck.filter(task=>ratings.get(task.id)===true);
+ const review=deck.filter(task=>ratings.get(task.id)===false);
+ const group=(title,tasks)=>`<details class="flashcard-group"><summary>${title} · ${tasks.length}</summary>
+  <ul>${tasks.map(task=>`<li data-no-translate>${esc(task.prompt)} — ${esc(task.answer)}</li>`).join('')}</ul></details>`;
+ $('#session-progress').style.width='100%';
+ $('#exercise').innerHTML=`<h2>${review.length?tr('Круг завершён','Round complete')+' · '+round:tr('Все карточки отмечены как выученные','All cards marked as learnt')}</h2>
+  ${group(tr('Выучены','Learnt'),known)}${group(tr('Ещё не выучены','Still learning'),review)}
+  <div class="chapter-actions">${review.length?
+   `<button class="button dark" id="flashcard-review">${tr('Повторить невыученные','Review unlearnt cards')} · ${review.length}</button>`:
+   `<button class="button light" id="flashcard-restart">${tr('Начать заново','Start again')}</button>`}
+   <button class="button light" id="flashcard-check">${tr('Проверить себя','Check yourself')}</button></div>`;
+ if(review.length){
+  $('#flashcard-review').onclick=()=>{
+   Object.assign(session,{mode:'flashcards',tasks:session.shuffled?shuffle(review):review,index:0,flipped:false,ratedThisRound:new Set(),round:round+1});
+   renderFlashcard();
+  };
+ }else $('#flashcard-restart').onclick=()=>startFlashcards(topic);
+ $('#flashcard-check').onclick=()=>chooseQuizLength(topic);
+ $('#exercise button').focus();
+}
+function renderFlashcard(){
+ const {topic,tasks,index,flipped,reversed,shuffled,ratings,deck,round}=session;
+ const c=chapters[topic],t=tasks[index];
+ const showTranslation=reversed!==flipped;
+ const known=[...ratings.values()].filter(Boolean).length,review=ratings.size-known;
+ $('#session-label').textContent=tr('Карточки','Flashcards')+' · '+(preferences.language==='en'&&c.titleEn?c.titleEn:c.title);
+ $('#session-progress').style.width=known/deck.length*100+'%';
+ $('#exercise').innerHTML=`
+  <div class="flashcard-top">
+   <span>${tr('Круг','Round')} ${round}</span><span id="flashcard-count" aria-live="polite">${index+1} / ${tasks.length}</span>
+  </div>
+  <button class="flashcard" id="flip-card" aria-label="${tr('Перевернуть карточку','Flip card')}" aria-pressed="${flipped}">
+   <span class="eyebrow">${showTranslation?'РУССКИЙ':'ENGLISH'}</span>
+   <span class="flashcard-text" lang="${showTranslation?'ru':'en'}" data-no-translate>${esc(showTranslation?t.answer:t.prompt)}</span>
+   <span class="flashcard-hint">${tr('Нажми, чтобы перевернуть','Click to flip')} ↻</span>
+  </button>
+  <div class="flashcard-ratings">
+   <button type="button" class="button light" id="flashcard-unknown" aria-pressed="${ratings.get(t.id)===false}"><span aria-hidden="true">✕</span> ${tr('Не выучил','Still learning')}</button>
+   <button type="button" class="button light" id="flashcard-known" aria-pressed="${ratings.get(t.id)===true}"><span aria-hidden="true">✓</span> ${tr('Выучил','Learnt')}</button>
+  </div>
+  <p class="flashcard-tally" aria-live="polite">${tr('Выучены','Learnt')}: ${known} · ${tr('Ещё не выучены','Still learning')}: ${review}</p>
+  <div class="flashcard-navigation">
+   <button class="button light" id="flashcard-prev" aria-label="Предыдущая карточка" ${index===0?'disabled':''}>←</button>
+   <span>← → ${tr('листать · пробел перевернуть','browse · Space to flip')}</span>
+   <button class="button light" id="flashcard-next" aria-label="Следующая карточка" ${index===tasks.length-1?'disabled':''}>→</button>
+  </div>
+  <div class="flashcard-options"><button class="text-button" id="flashcard-shuffle" aria-pressed="${shuffled}">${tr('Перемешать','Shuffle')}</button><button class="text-button" id="flashcard-direction">${reversed?tr('Сначала русский','Russian first'):tr('Сначала английский','English first')} ↔</button></div>
+  <button class="button dark" id="flashcard-check">${tr('Проверить себя','Check yourself')} →</button>`;
+ $('#flip-card').onclick=()=>{session.flipped=!flipped;renderFlashcard()};
+ $('#flashcard-prev').onclick=()=>moveFlashcard(-1);
+ $('#flashcard-next').onclick=()=>moveFlashcard(1);
+ $('#flashcard-unknown').onclick=()=>rateFlashcard(false);
+ $('#flashcard-known').onclick=()=>rateFlashcard(true);
+ $('#flashcard-direction').onclick=()=>{session.reversed=!reversed;session.flipped=false;renderFlashcard()};
+ $('#flashcard-shuffle').onclick=()=>{
+  session.shuffled=!shuffled;
+  const inRound=new Set(tasks.map(task=>task.id));
+  session.tasks=session.shuffled?shuffle(tasks):deck.filter(task=>inRound.has(task.id));
+  session.index=0;
+  session.flipped=false;
+  renderFlashcard();
+ };
+ $('#flashcard-check').onclick=()=>chooseQuizLength(topic);
+ $('#flip-card').focus();
+}
 $('#trainer').addEventListener('keydown',e=>{if(!$('#trainer').open||session?.mode!=='flashcards'||e.altKey||e.ctrlKey||e.metaKey)return;if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();moveFlashcard(e.key==='ArrowLeft'?-1:1)}else if(e.code==='Space'&&(e.target===$('#trainer')||e.target===$('#flip-card')||e.target===$('#exercise'))){e.preventDefault();$('#flip-card').click()}});
 function renderExercise(){const c=chapters[session.topic],t=session.tasks[session.index],n=session.tasks.length;$('#session-label').textContent=`${c.title.toUpperCase()} · ${session.index+1} / ${n}`;$('#session-progress').style.width=session.index/n*100+'%';const label={vocab:'Выбери перевод',grammar:'Измени грамматическую форму',formation:'Образуй подходящее слово',reading:c.readingType==='true-false-not-stated'?tr('Оцени утверждение по тексту','Classify the statement using the text'):'Выбери вопрос к тексту'}[c.kind];let choices=t.choices;
 if(c.kind==='vocab'){const pool=[...new Set(c.tasks.map(x=>x.answer))].filter(v=>v!==t.answer);choices=shuffle([t.answer,...shuffle(pool).slice(0,3)])}
