@@ -226,8 +226,36 @@ dialog[open]::backdrop { animation: slovo-veil var(--menu) var(--ease-ui) both; 
 }
 
 /* Neutral surfaces inspired by DesignBookmark Motion's Command button. */
-:root { --paper:#f8f8f8; --sheet:#fff; --ink:#252525; --muted:#555; --faint:#666; --line:#dedede; --hover:#ededed; --blue:#455777; --rule:#555; }
-:root[data-theme="dark"] { --paper:#191919; --sheet:#242424; --ink:#f3f3f3; --muted:#c5c5c5; --faint:#aaa; --line:#444; --hover:#333; --blue:#c1d1f5; --rule:#bbb; }
+/* Кобальт и белый */
+:root {
+ --paper:#fff;
+ --sheet:#edf2ff;
+ --ink:#111;
+ --muted:#4b566e;
+ --faint:#56637c;
+ --line:#ccd8f8;
+ --hover:#dfe8ff;
+ --blue:#0033d9;
+ --rule:#0033d9;
+ --brand-action:#0033d9;
+ --brand-action-hover:#0029ac;
+ --brand-accent:#ed1742;
+ --menu-bg:#0033d9;
+ --menu-hover:#0029ac;
+}
+:root[data-theme="dark"] {
+ --paper:#10131d;
+ --sheet:#1b2337;
+ --ink:#f6f8ff;
+ --muted:#c5cee5;
+ --faint:#aebad8;
+ --line:#394564;
+ --hover:#283657;
+ --blue:#a8bcff;
+ --rule:#a8bcff;
+ --menu-bg:#102d91;
+ --menu-hover:#163eb5;
+}
 :root.low-vision { --ink:#151515; --muted:#343434; --line:#666; }
 :root.low-vision[data-theme="dark"] { --ink:#fff; --muted:#eee; --line:#bbb; }
 .sidebar { background: rgba(26,26,26,.94); border-right-color:#ffffff20; }
@@ -236,22 +264,30 @@ dialog[open]::backdrop { animation: slovo-veil var(--menu) var(--ease-ui) both; 
 }
 .sidebar::before, .low-vision .sidebar::before { content:none; background:none; }
 .low-vision .sidebar { background:#171717; }
-:root:not([data-theme="dark"]) .button.dark { background:#292929; border-color:#292929; }
-:root:not([data-theme="dark"]) .button.dark:hover { background:#393939; }
+
+:is(#main-content,#trainer) .button.dark { background:var(--brand-action); border-color:var(--brand-action); color:#fff; }
+:is(#main-content,#trainer) .button.dark:hover { background:var(--brand-action-hover); border-color:var(--brand-action-hover); }
+[data-theme="dark"] body, [data-theme="dark"] main, [data-theme="dark"] .topbar { background:var(--paper); }
+:is(#main-content,#trainer) .button.light { background:var(--sheet); border-color:var(--line); }
+:is(#main-content,#trainer) .button.light:hover { background:var(--hover); }
+.page-link, [data-theme="dark"] .page-link { background:var(--sheet); }
+.page-link:hover, [data-theme="dark"] .page-link:hover { background:var(--hover); }
+.page-link-icon { color:var(--blue); }
+#trainer { background:var(--paper); border-color:var(--line); }
+
 .command-search { position:relative; flex:none; z-index:3; }
-.command-shell { position:relative; height:40px; width:max-content; overflow:hidden; background:#2c2c2c; color:rgba(255,255,255,.85); border-radius:20px; transition:background-color 150ms; }
+.command-shell { position:relative; height:40px; width:max-content; overflow:hidden; background:var(--sheet); color:var(--ink); border-radius:20px; transition:background-color 150ms; }
 .command-shell:focus-within:has(:focus-visible) { outline:2px solid var(--muted); outline-offset:2px; }
-.command-search:not(.is-open) .command-shell:hover { background:#333; }
+.command-search:not(.is-open) .command-shell:hover { background:var(--hover); }
 .command-trigger,.command-field { display:flex; align-items:center; height:100%; }
 .command-trigger { --font-family:"SF Pro Text","SF Pro",-apple-system,BlinkMacSystemFont,system-ui,sans-serif; font-family:var(--font-family); width:max-content; gap:12px; padding:0 10px 0 16px; border:0; background:transparent; color:inherit; white-space:nowrap; font-size:14px; font-weight:500; }
-.command-trigger svg { display:none; }
-.command-shell svg { width:16px; height:16px; flex:none; color:rgba(255,255,255,.5); }
+.command-shell svg { width:16px; height:16px; flex:none; color:var(--brand-accent); }
 .command-field { gap:10px; padding:0 10px 0 14px; width:min(300px, calc(100vw - 84px)); }
-.command-field input { flex:1; min-width:0; padding:0; border:0; outline:none; background:transparent; color:white; font:inherit; font-size:16px; }
-.command-field input::placeholder { color:rgba(255,255,255,.35); }
+.command-field input { flex:1; min-width:0; padding:0; border:0; outline:none; background:transparent; color:var(--ink); font:inherit; font-size:16px; }
+.command-field input::placeholder { color:var(--muted); }
 .command-keys { display:flex; gap:4px; }
-.command-search kbd { display:inline-flex; align-items:center; justify-content:center; height:20px; min-width:20px; padding:0 6px; font:500 11px/1 var(--font-family); color:rgba(255,255,255,.5); border-radius:6px; background:rgba(255,255,255,.07); transition:background-color 150ms,color 150ms; }
-.command-search kbd[data-on] { color:white; background:rgba(255,255,255,.18); transition-duration:75ms; }
+.command-search kbd { display:inline-flex; align-items:center; justify-content:center; height:20px; min-width:20px; padding:0 6px; font:500 11px/1 var(--font-family); color:var(--muted); border-radius:6px; background:var(--hover); transition:background-color 150ms,color 150ms; }
+.command-search kbd[data-on] { color:white; background:var(--brand-action); transition-duration:75ms; }
 .command-shell [inert] { position:absolute; top:0; left:0; pointer-events:none; }
 .command-results { position:absolute; right:0; top:calc(100% + 8px); width:min(340px, calc(100vw - 28px)); padding:4px; border-radius:8px; background:var(--sheet); border:1px solid var(--line); box-shadow:0 6px 18px #0002; }
 .command-results button { width:100%; display:grid; gap:2px; text-align:left; border:0; border-radius:4px; padding:8px; background:transparent; overflow-wrap:anywhere; }
@@ -399,8 +435,8 @@ dialog { padding: 24px; }
 #main-content { margin-left:0; }
 .corner-menu { position:relative; z-index:4; flex:none; --menu-width:min(300px,calc(100vw - 2 * var(--header-inset))); }
 .topbar:has(.command-search.is-open) .corner-menu { z-index:1; }
-#sidebar-toggle { position:relative; z-index:1; width:var(--header-control-size); height:var(--header-control-size); border-radius:20px; background:#262626; color:#fff; }
-#sidebar-toggle:hover { background:#333; }
+#sidebar-toggle { position:relative; z-index:1; width:var(--header-control-size); height:var(--header-control-size); border-radius:20px; background:var(--menu-bg); color:#fff; }
+#sidebar-toggle:hover { background:var(--menu-hover); }
 #sidebar-toggle[aria-expanded="true"] { background:transparent; }
 .sidebar-toggle-icon { position:relative; width:24px; height:24px; display:block; }
 .sidebar-toggle-icon i { position:absolute; inset:11px 3px auto; height:2px; border-radius:2px; background:currentColor; }
@@ -409,21 +445,21 @@ dialog { padding: 24px; }
 #sidebar-toggle[aria-expanded="true"] i:first-child { transform:rotate(45deg); }
 #sidebar-toggle[aria-expanded="true"] i:nth-child(2) { opacity:0; }
 #sidebar-toggle[aria-expanded="true"] i:last-child { transform:rotate(-45deg); }
-.corner-menu .sidebar { position:absolute; z-index:0; inset:0 auto auto 0; transform:none; transition:none; display:block; width:var(--menu-width); padding:var(--header-control-size) 0 0; overflow:hidden; border:0; border-radius:16px; background:#262626; box-shadow:none; }
+.corner-menu .sidebar { position:absolute; z-index:0; inset:0 auto auto 0; transform:none; transition:none; display:block; width:var(--menu-width); padding:var(--header-control-size) 0 0; overflow:hidden; border:0; border-radius:16px; background:var(--menu-bg); box-shadow:none; }
 .corner-menu .sidebar[inert] { width:var(--header-control-size); height:var(--header-control-size); visibility:hidden; pointer-events:none; border-radius:20px; }
 .corner-menu-scroll { width:var(--menu-width); max-height:calc(100dvh - 2 * var(--header-inset) - var(--header-control-size)); overflow:auto; scrollbar-width:thin; overscroll-behavior:contain; padding:4px 8px 12px; }
 #crumb { overflow:hidden; text-overflow:ellipsis; }
 
 /* Toggle Switch from DesignBookmark. */
 .settings-toggles {
- --switch-on:#34d17a;
- --switch-off:rgba(23,24,26,.12);
+ --switch-on:var(--brand-action);
+ --switch-off:#8896b7;
  max-width:440px;
  padding:6px 16px;
  border-radius:24px;
- background:#f7f7f6;
+ background:var(--sheet);
 }
-[data-theme="dark"] .settings-toggles { --switch-off:rgba(255,255,255,.14); background:#262626; }
+[data-theme="dark"] .settings-toggles { --switch-on:#3159ec; --switch-off:#697693; }
 .settings-toggles .setting-row { align-items:center; gap:12px; min-height:60px; padding:8px 0; border:0; }
 .settings-toggles .setting-name { font-size:15px; font-weight:500; }
 .low-vision .settings-toggles .setting-name { font-size:18px; }
