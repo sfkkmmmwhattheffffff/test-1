@@ -269,3 +269,119 @@ dialog[open]::backdrop { animation: slovo-veil var(--menu) var(--ease-ui) both; 
  .command-search.is-open { position:absolute; right:48px; }
  .command-results { width:min(340px, calc(100vw - 60px)); }
 }
+
+/* Responsive layout pass informed by unslop by Damir Sokolovsky, CC BY 4.0. */
+.content {
+ --page-gutter: 32px;
+ max-width: 1152px;
+ padding: 48px var(--page-gutter) 0;
+}
+.greeting { margin-block-end: 32px; }
+.greeting h1 { max-width: 29ch; text-wrap: pretty; }
+.topbar { gap: 8px; padding-inline: 16px; }
+.header-right { gap: 8px; }
+
+.page-links { border: 1px solid var(--line); border-radius: 12px; padding: 4px; }
+.page-link {
+ display: grid;
+ grid-template-columns: 20px minmax(0,1fr) auto 16px;
+ align-items: center;
+ gap: 8px;
+ min-height: 48px;
+ padding: 8px 12px;
+ border-radius: 8px;
+}
+.page-link small { margin: 0; font-size: 12px; max-width: 16ch; overflow-wrap: anywhere; }
+.page-link > svg { width: 16px; height: 16px; }
+.page-link-icon { width: 20px; justify-self: center; }
+.page-link > span:nth-child(2) { min-width: 0; overflow-wrap: anywhere; }
+
+#secondary-view > .chapter-actions {
+ display: grid;
+ grid-template-columns: repeat(4,minmax(0,1fr));
+ gap: 8px;
+ margin-block: 16px 24px;
+}
+#secondary-view > .chapter-actions #chapter-flashcards { grid-column: auto; }
+#secondary-view > .chapter-actions .button {
+ min-height: 44px;
+ min-width: 0;
+ padding: 8px;
+ line-height: 1.4;
+ white-space: normal;
+}
+#chapter-words .search-input { width: min(100%, 440px); }
+#search-count { margin-block: 8px; font-size: 13px; color: var(--muted); }
+#catalogue .vocab-card {
+ display: grid;
+ grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+ gap: 8px 16px;
+ padding: 12px 8px;
+ min-height: 48px;
+ overflow-wrap: anywhere;
+}
+#catalogue .vocab-card h3 { grid-row: 1; grid-column: 1; margin: 0; font-size: 15px; }
+#catalogue .vocab-card strong { grid-row: 1; grid-column: 2; font-size: 14px; }
+#catalogue .vocab-card small { grid-row: 1; grid-column: 3; font-size: 11px; }
+[data-dictionary-topic] { width: 100%; text-align: left; }
+[data-dictionary-topic] small { display: block; }
+
+dialog { padding: 24px; }
+#trainer:not(.wide-trainer):not(.grammar-expanded) { width: min(600px, calc(100vw - 32px)); }
+#trainer.wide-trainer:not(.grammar-expanded) { width: min(880px, calc(100vw - 32px)); }
+.modal-head { font-size: 12px; align-items: center; gap: 8px; }
+.flashcard { min-height: clamp(196px, 31dvh, 288px); padding: 20px 16px; gap: 16px; }
+.flashcard-navigation { gap: 8px; }
+.flashcard-navigation > span { font-size: 12px; }
+.quiz-length-options { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+.quiz-length-option { min-width: 0; overflow-wrap: anywhere; }
+.trainer-choice { gap: 16px; padding: 16px 8px; }
+.command-results { max-height: min(400px, calc(100dvh - 64px)); overflow: auto; }
+
+@media (max-width: 1100px) {
+ #secondary-view > .chapter-actions { grid-template-columns: repeat(2,minmax(0,1fr)); }
+ #catalogue .vocab-card { grid-template-columns: repeat(2,minmax(0,1fr)); }
+ #catalogue .vocab-card small { grid-column: 1 / -1; grid-row: 2; }
+}
+@media (max-width: 800px) {
+ .content { --page-gutter: 24px; padding-top: 32px; }
+}
+@media (max-width: 480px) {
+ .content { --page-gutter: 16px; padding-top: 24px; }
+ .greeting { margin-block-end: 24px; }
+ .greeting h1 { font-size: clamp(26px, 7vw, 32px); }
+ .topbar { padding-inline: 8px; gap: 4px; }
+ .header-right { gap: 4px; }
+ .topbar > .breadcrumb { gap: 4px; }
+ .command-search.is-open { right: 44px; }
+ .command-field { width: min(300px, calc(100vw - 84px)); }
+ .page-link { grid-template-columns: 20px minmax(0,1fr) 16px; padding: 8px; }
+ .page-link small { grid-column: 2; grid-row: 2; max-width: none; text-align: left; }
+ .page-link > svg { grid-column: 3; grid-row: 1 / span 2; }
+ dialog { padding: 16px; }
+ #trainer:not(.wide-trainer):not(.grammar-expanded), #trainer.wide-trainer:not(.grammar-expanded) {
+  width: calc(100vw - 24px);
+  max-height: calc(100dvh - 24px);
+ }
+ .flashcard-ratings { gap: 8px; }
+ .flashcard-options { gap: 8px; }
+ .flashcard-options button { min-height: 36px; }
+ .flashcard-navigation > span { font-size: 11px; }
+ .quiz-length-option { padding: 12px; }
+ footer { font-size: 12px; }
+}
+.low-vision #secondary-view > .chapter-actions { grid-template-columns: repeat(2,minmax(0,1fr)); }
+@media (max-width: 380px) {
+ .low-vision #secondary-view > .chapter-actions { grid-template-columns: minmax(0,1fr); }
+ .command-trigger > span:not(.command-keys) {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);
+ }
+ .command-trigger { width: 36px; justify-content: center; }
+}
+.page-link small { text-align: end; }
+@media (max-width: 480px) { .page-link small { text-align: start; } }
+@media (max-width: 480px) and (max-height: 680px) {
+ .flashcard { min-height: 164px; padding: 16px; gap: 12px; }
+ .flashcard-top, .flashcard-navigation, .flashcard-options { margin-block: 8px; }
+ #trainer:has(.flashcard) .session-track { margin-block: 12px; }
+}
