@@ -218,12 +218,12 @@ function viewVocabulary(i,backPage='vocabulary'){
  $('#secondary-view').innerHTML=`
   <button class="text-button" id="back-topics">${tr('← Все темы','← All topics')}</button>
   <div class="chapter-actions">
-   <button class="button light" id="chapter-wordlist" aria-expanded="false" aria-controls="chapter-words">${tr('Вордлист','Word list')}</button>
+   <button class="button light" id="chapter-wordlist" aria-expanded="true" aria-controls="chapter-words">${tr('Вордлист','Word list')}</button>
    <button class="button light" id="chapter-flashcards">${tr('Учить слова','Study words')}</button>
    <button class="button light" id="chapter-start">${tr('Проверить себя','Check yourself')}</button>
    <button class="button light" id="chapter-formation">${tr('Задания формата ОГЭ','OGE-style tasks')}</button>
   </div>
-  <section id="chapter-words" hidden>
+  <section id="chapter-words">
    <label class="search-label" for="word-search">${tr('Найти слово или перевод','Find a word or translation')}</label>
    <input class="search-input" id="word-search" type="search">
    <p id="search-count" role="status"></p><div class="word-list" id="catalogue"></div>
@@ -241,6 +241,7 @@ function viewVocabulary(i,backPage='vocabulary'){
   $('#chapter-wordlist').setAttribute('aria-expanded',String(!panel.hidden));
   if(!panel.hidden){catalogue();$('#word-search').focus()}
  };
+ catalogue();
  $('#word-search').oninput=catalogue;
  $('#back-topics').onclick=()=>showPage(backPage);
  $('#chapter-start').onclick=()=>chooseQuizLength(i);
