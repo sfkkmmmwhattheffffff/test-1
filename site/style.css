@@ -246,18 +246,20 @@ dialog[open]::backdrop { animation: slovo-veil var(--menu) var(--ease-ui) both; 
 :root:not([data-theme="dark"]) .button.dark { background:#292929; border-color:#292929; }
 :root:not([data-theme="dark"]) .button.dark:hover { background:#393939; }
 .command-search { position:relative; flex:none; z-index:3; }
-.command-shell { height:36px; background:#2c2c2c; color:#f3f3f3; border-radius:8px; transform-origin:right center; }
+.command-shell { position:relative; height:40px; width:max-content; overflow:hidden; background:#2c2c2c; color:rgba(255,255,255,.85); border-radius:20px; transition:background-color 150ms; }
+.command-shell:focus-within:has(:focus-visible) { outline:2px solid var(--muted); outline-offset:2px; }
 .command-search:not(.is-open) .command-shell:hover { background:#333; }
-.command-trigger,.command-field { display:flex; align-items:center; height:100%; gap:8px; padding:0 8px; }
-.command-trigger { border:0; background:transparent; color:inherit; border-radius:8px; white-space:nowrap; font-size:13px; }
-.command-shell svg { width:16px; height:16px; color:#ccc; }
-.command-field { width:min(300px, calc(100vw - 84px)); }
-.command-field input { flex:1; min-width:0; border:0; background:transparent; color:#fff; font-size:16px; }
-.command-field input::placeholder { color:#bbb; }
-.command-field input:focus-visible { outline-offset:1px; }
+.command-trigger,.command-field { display:flex; align-items:center; height:100%; }
+.command-trigger { width:max-content; gap:12px; padding:0 10px 0 16px; border:0; background:transparent; color:inherit; white-space:nowrap; font-size:14px; font-weight:500; }
+.command-trigger svg { display:none; }
+.command-shell svg { width:16px; height:16px; flex:none; color:rgba(255,255,255,.5); }
+.command-field { gap:10px; padding:0 10px 0 14px; width:min(300px, calc(100vw - 84px)); }
+.command-field input { flex:1; min-width:0; padding:0; border:0; outline:none; background:transparent; color:white; font:inherit; font-size:16px; }
+.command-field input::placeholder { color:rgba(255,255,255,.35); }
 .command-keys { display:flex; gap:4px; }
-.command-search kbd { font:500 11px/1 var(--font-family); color:#ccc; padding:4px; border-radius:4px; background:#ffffff16; }
-.command-search kbd[data-on] { color:#fff; background:#ffffff34; }
+.command-search kbd { display:inline-flex; align-items:center; justify-content:center; height:20px; min-width:20px; padding:0 6px; font:500 11px/1 var(--font-family); color:rgba(255,255,255,.5); border-radius:6px; background:rgba(255,255,255,.07); transition:background-color 150ms,color 150ms; }
+.command-search kbd[data-on] { color:white; background:rgba(255,255,255,.18); transition-duration:75ms; }
+.command-shell [inert] { position:absolute; top:0; left:0; pointer-events:none; }
 .command-results { position:absolute; right:0; top:calc(100% + 8px); width:min(340px, calc(100vw - 28px)); padding:4px; border-radius:8px; background:var(--sheet); border:1px solid var(--line); box-shadow:0 6px 18px #0002; }
 .command-results button { width:100%; display:grid; gap:2px; text-align:left; border:0; border-radius:4px; padding:8px; background:transparent; overflow-wrap:anywhere; }
 .command-results button:hover,.command-results button:focus-visible { background:var(--hover); }
@@ -376,7 +378,8 @@ dialog { padding: 24px; }
  .command-trigger > span:not(.command-keys) {
   position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);
  }
- .command-trigger { width: 36px; justify-content: center; }
+ .command-trigger { width: 40px; justify-content: center; padding:0; }
+ .command-trigger svg { display:block; }
 }
 .page-link small { text-align: end; }
 @media (max-width: 480px) { .page-link small { text-align: start; } }

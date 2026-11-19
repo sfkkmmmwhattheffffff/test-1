@@ -13,7 +13,7 @@
  const mac = /mac|iphone|ipad|ipod/i.test(navigator.userAgentData?.platform ?? navigator.platform);
  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
  const press = {stiffness:520,damping:34,mass:.6};
- const expansion = {stiffness:300,damping:34-.3*20,mass:1};
+ const expansion = {stiffness:300,damping:28,mass:1};
  const swap = {duration:180,easing:'cubic-bezier(.23,1,.32,1)'};
  const fold = value => value.toLocaleLowerCase().replaceAll('ё','е').trim();
  let layoutMotion, pressMotion;
@@ -21,44 +21,58 @@
  caps[0].textContent = mac ? '⌘' : 'Ctrl';
  trigger.setAttribute('aria-keyshortcuts', mac ? 'Meta+K' : 'Control+K');
 
- // Sample the damped spring into transform-only keyframes.
- function spring(element, from, to, physics, transform) {
-  if (reduced.matches || !element.animate) return;
-  let position=from, velocity=0;
-  const frames=[{transform:transform(from)}];
-  for(let frame=0;frame<48;frame++){
-   for(let step=0;step<4;step++){
-    const acceleration=(physics.stiffness*(to-position)-physics.damping*velocity)/physics.mass;
-    velocity+=acceleration/240;
-    position+=velocity/240;
-   }
-   frames.push({transform:transform(position)});
-   if(Math.abs(to-position)<.001 && Math.abs(velocity)<.01)break;
+ // The same damped oscillator drives both the shell width and its press scale.
+ function spring(element, property, from, to, physics, unit) {
+  if (reduced.matches || !element.animate || from === to) return;
+  const decay = physics.damping / (2 * physics.mass);
+  const frequency = Math.sqrt(physics.stiffness / physics.mass - decay ** 2);
+  const frames = [];
+  for (let frame = 0; frame <= 60; frame++) {
+   const t = frame / 60;
+   const remaining = Math.exp(-decay * t) *
+    (Math.cos(frequency * t) + decay / frequency * Math.sin(frequency * t));
+   frames.push({[property]: (to + (from - to) * remaining) + unit});
+   if (t > .25 && Math.exp(-decay * t) < .0001) break;
   }
-  frames.push({transform:transform(to)});
-  return element.animate(frames,{duration:(frames.length-1)*1000/60,easing:'linear'});
+  frames.push({[property]: to + unit});
+  return element.animate(frames, {duration:(frames.length-1)*1000/60, easing:'linear'});
  }
 
  function setPressed(active){
-  const scale=pressMotion?Number(new DOMMatrixReadOnly(getComputedStyle(trigger).transform).a):1;
+  const current = parseFloat(getComputedStyle(shell).scale) || 1;
+  const target = active && !reduced.matches ? .97 : 1;
+  if (Number(shell.style.scale || 1) === target) return;
   pressMotion?.cancel();
-  const target=active ? .97 : 1;
-  trigger.style.transform=active?'scale(.97)':'';
-  pressMotion=spring(trigger,scale,target,press,value=>'scale('+value+')');
+  shell.style.scale = target;
+  pressMotion = spring(shell,'scale',current,target,press,'');
  }
 
+ const clear = {opacity:1,filter:'blur(0px)'};
+ const blurred = {opacity:0,filter:'blur(4px)'};
  function setOpen(open, restore=false){
-  if(open===!form.hidden)return;
-  const previous=shell.getBoundingClientRect().width;
+  if(open===host.classList.contains('is-open'))return;
+  const previous = parseFloat(getComputedStyle(shell).width);
   layoutMotion?.cancel();
+  const incoming = open ? form : trigger;
+  const outgoing = open ? trigger : form;
+  const outgoingStyle = getComputedStyle(outgoing);
+  const start = {opacity:outgoingStyle.opacity,filter:outgoingStyle.filter};
+  for(const element of [incoming,outgoing]){
+   for(const animation of element.getAnimations()) animation.cancel();
+  }
+  outgoing.inert=true;
+  incoming.hidden=false;
+  incoming.inert=false;
   host.classList.toggle('is-open',open);
-  form.hidden=!open;
-  trigger.hidden=open;
   trigger.setAttribute('aria-expanded',String(open));
-  const width=shell.offsetWidth;
-  layoutMotion=spring(shell,previous/width,1,expansion,value=>'scaleX('+value+')');
-  const contents=open?form:trigger;
-  if(!reduced.matches)contents.animate?.([{opacity:0},{opacity:1}],{...swap,delay:60});
+  layoutMotion=spring(shell,'width',previous,shell.offsetWidth,expansion,'px');
+  if(reduced.matches){
+   outgoing.hidden=true;
+  }else{
+   const exit=outgoing.animate([start,blurred],swap);
+   exit.onfinish=()=>{if(outgoing.inert)outgoing.hidden=true};
+   incoming.animate([blurred,clear],{...swap,delay:60,fill:'backwards'});
+  }
   if(open){
    const label=tr('Поиск по «Слову»','Search Slovo');
    input.setAttribute('aria-label',label);
@@ -142,15 +156,17 @@
  });
  document.addEventListener('pointerdown',event=>{if(!host.contains(event.target))setOpen(false)});
  window.addEventListener('keydown',event=>{
-  if(!form.hidden&&event.key==='Escape'){
+  if(host.classList.contains('is-open')&&event.key==='Escape'){
    event.preventDefault();
    setOpen(false,true);
    return;
   }
-  if(document.querySelector('dialog[open]')||!form.hidden)return;
+  if(document.querySelector('dialog[open]')||host.classList.contains('is-open'))return;
   const modifier=mac?event.metaKey:event.ctrlKey;
   const key=event.code==='KeyK'||event.key.toLowerCase()==='k';
-  if(modifier)caps[0].dataset.on='';
+  caps[0].toggleAttribute('data-on',modifier);
+  caps[1].toggleAttribute('data-on',key);
+  setPressed(modifier||key);
   if(modifier&&key&&!event.altKey&&!event.shiftKey&&!event.repeat){
    event.preventDefault();
    caps[1].dataset.on='';
@@ -163,7 +179,10 @@
   setPressed(false);
  }
  window.addEventListener('keyup',event=>{
-  if(['KeyK','MetaLeft','MetaRight','ControlLeft','ControlRight'].includes(event.code))release();
+  const modifier=mac?event.metaKey:event.ctrlKey;
+  caps[0].toggleAttribute('data-on',modifier);
+  caps[1].removeAttribute('data-on');
+  setPressed(modifier);
  });
  window.addEventListener('blur',release);
 })();
