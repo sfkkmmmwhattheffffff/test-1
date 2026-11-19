@@ -38,7 +38,7 @@ function chooseVocabularyStudyLength(topic,mode) {
  showVocabularyStudy(topic,vocabularyModeName(mode),`
   <h2>${tr('Сколько слов?','How many words?')}</h2>
   <div class="quiz-length-options">
-   ${[[6,tr('6 слов','6 words')],[50,tr('50 слов','50 words')],['all',tr('Все слова','All words')]].map(([size,label])=>`
+   ${[[defaultVocabularyBatch,tr('20 слов','20 words')],[6,tr('6 слов','6 words')],[50,tr('50 слов','50 words')],['all',tr('Все слова','All words')]].map(([size,label])=>`
     <button type="button" class="quiz-length-option" data-study-size="${size}"><strong>${label}</strong></button>`).join('')}
   </div><button class="text-button" id="study-back">${tr('← Все режимы','← All modes')}</button>`);
  $('#study-back').onclick=()=>openVocabularyModes(topic);
