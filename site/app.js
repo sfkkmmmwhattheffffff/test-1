@@ -279,11 +279,135 @@ $('#sidebar-toggle').onclick=()=>{closeHeaderSections();if(sidebarMedia.matches)
 $('#sidebar-backdrop').onclick=()=>{mobileSidebarOpen=false;syncSidebar();$('#sidebar-toggle').focus()};
 sidebarMedia.addEventListener('change',()=>{mobileSidebarOpen=false;syncSidebar()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&mobileSidebarOpen&&!$('#trainer').open&&!$('#info').open){mobileSidebarOpen=false;syncSidebar();$('#sidebar-toggle').focus()}});
-function closeHeaderSections(restoreFocus=false){$('#header-sections').hidden=true;$('#header-sections-toggle').setAttribute('aria-expanded','false');if(restoreFocus)$('#header-sections-toggle').focus()}
+// Dynamic Menu spring and stagger settings adapted from DesignBookmark.
+const sectionToggle = $('#header-sections-toggle');
+const sectionMenu = $('#header-sections');
+const sectionSurface = sectionMenu.parentElement;
+const sectionLines = sectionToggle.querySelectorAll('i');
+const sectionReducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+const menuSpring = (value, stiffness, damping) => ({value, target:value, velocity:0, stiffness, damping});
+const menuWidth = menuSpring(0, 320, 26);
+const menuHeight = menuSpring(32, 240, 22);
+const menuCross = menuSpring(0, 380, 24);
+let menuItems = [], menuFrame = 0, menuStart = 0, menuPrevious = 0, menuAvailable = 0;
+
+function headerSectionsOpen(){
+ return sectionToggle.getAttribute('aria-expanded') === 'true';
+}
+
+function measureSectionMenu(open){
+ const trigger = sectionToggle.getBoundingClientRect();
+ menuAvailable = Math.floor(document.documentElement.clientWidth - trigger.left - 8);
+ const panelWidth = Math.min(Math.max(300, trigger.width), menuAvailable - 4);
+ sectionMenu.style.setProperty('--menu-height', Math.max(0, window.innerHeight - trigger.bottom - 12) + 'px');
+ sectionMenu.style.width = Math.max(0, panelWidth - 2) + 'px';
+ menuWidth.target = open ? panelWidth : trigger.width;
+ menuHeight.target = open ? trigger.height + sectionMenu.offsetHeight : trigger.height;
+ menuCross.target = Number(open);
+}
+
+function renderSectionMenu(now){
+ const open = headerSectionsOpen();
+ const dt = Math.min((now - menuPrevious) / 1000, 1 / 30) / 4;
+ menuPrevious = now;
+ const springs = [menuWidth, menuHeight, menuCross];
+ for (const {spring, delay} of menuItems) {
+  if (now - menuStart >= delay || sectionReducedMotion.matches) spring.target = Number(open);
+  springs.push(spring);
+ }
+ for (const spring of springs) {
+  if (sectionReducedMotion.matches) {
+   spring.value = spring.target;
+   spring.velocity = 0;
+  } else {
+   for (let step = 0; step < 4; step++) {
+    spring.velocity += ((spring.target - spring.value) * spring.stiffness - spring.velocity * spring.damping) * dt;
+    spring.value += spring.velocity * dt;
+   }
+  }
+ }
+ const progress = Math.max(0, Math.min(menuCross.value, 1));
+ sectionSurface.style.width = Math.min(menuWidth.value, menuAvailable) + 'px';
+ sectionSurface.style.height = menuHeight.value + 'px';
+ sectionSurface.style.borderRadius = (16 - 4 * progress) + 'px';
+ sectionLines.forEach((line, index) => {
+  const direction = index === 0 ? 1 : -1;
+  line.style.transform = 'translateY(' + (-3 * direction * (1 - menuCross.value)) + 'px) rotate(' + (45 * direction * menuCross.value) + 'deg)';
+ });
+ for (const {button, spring} of menuItems) {
+  button.style.opacity = spring.value;
+  button.style.transform = 'translateY(' + (18 * (1 - spring.value)) + 'px)';
+ }
+ const moving = springs.some(spring => Math.abs(spring.target - spring.value) > .002 || Math.abs(spring.velocity) > .02);
+ const waiting = menuItems.some(({spring}) => spring.target !== Number(open));
+ menuFrame = moving || waiting ? requestAnimationFrame(renderSectionMenu) : 0;
+ if (!menuFrame && !open) sectionSurface.hidden = true;
+}
+
+function setHeaderSections(open){
+ const wasHidden = sectionSurface.hidden;
+ sectionSurface.hidden = false;
+ sectionToggle.setAttribute('aria-expanded', String(open));
+ sectionMenu.inert = !open;
+ measureSectionMenu(open);
+ if (wasHidden) {
+  menuWidth.value = sectionToggle.offsetWidth;
+  menuHeight.value = sectionToggle.offsetHeight;
+ }
+ if (open && wasHidden) sectionMenu.scrollTop = 0;
+ menuItems.forEach((item, index) => {
+  item.delay = open ? 80 + index * 50 : (menuItems.length - 1 - index) * 30;
+ });
+ menuStart = menuPrevious = performance.now();
+ cancelAnimationFrame(menuFrame);
+ // Paint the collapsed geometry before the first animated frame.
+ renderSectionMenu(menuStart);
+}
+
+function closeHeaderSections(restoreFocus=false){
+ if (!headerSectionsOpen()) return;
+ if (restoreFocus) sectionToggle.focus();
+ setHeaderSections(false);
+}
+
 $('#header-home').onclick=()=>showPage('home');
-$('#header-sections-toggle').onclick=()=>{const menu=$('#header-sections');if(!menu.hidden){closeHeaderSections();return}menu.replaceChildren();document.querySelectorAll('#sidebar .nav-item[data-page]').forEach(source=>{const button=document.createElement('button');button.type='button';button.className='header-section-item';button.textContent=source.querySelector('.nav-name').textContent;if(source.dataset.page===currentPage)button.setAttribute('aria-current','page');button.onclick=()=>{showPage(source.dataset.page);$('#main-content').focus()};menu.append(button)});menu.hidden=false;$('#header-sections-toggle').setAttribute('aria-expanded','true')};
-document.addEventListener('click',e=>{if(!e.target.closest('#header-sections,#header-sections-toggle'))closeHeaderSections()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#header-sections').hidden){e.preventDefault();closeHeaderSections(true)}});
+sectionToggle.onclick = () => {
+ if (headerSectionsOpen()) {
+  closeHeaderSections();
+  return;
+ }
+ if (sectionSurface.hidden) {
+  menuItems = Array.from(document.querySelectorAll('#sidebar .nav-item[data-page]'), source => {
+   const button = document.createElement('button');
+   button.type = 'button';
+   button.className = 'header-section-item';
+   button.onclick = () => {
+    showPage(source.dataset.page);
+    $('#main-content').focus();
+   };
+   return {button, source, spring:menuSpring(0, 260, 22)};
+  });
+  sectionMenu.replaceChildren(...menuItems.map(({button}) => button));
+ }
+ for (const {button, source} of menuItems) {
+  button.textContent = source.querySelector('.nav-name').textContent;
+  if (source.dataset.page === currentPage) button.setAttribute('aria-current', 'page');
+  else button.removeAttribute('aria-current');
+ }
+ setHeaderSections(true);
+};
+window.addEventListener('resize', () => {
+ if (!sectionSurface.hidden) setHeaderSections(headerSectionsOpen());
+});
+document.addEventListener('click', event => {
+ if (!event.target.closest('.dynamic-menu')) closeHeaderSections();
+});
+document.addEventListener('keydown', event => {
+ if (event.key === 'Escape' && headerSectionsOpen() && !event.defaultPrevented) {
+  event.preventDefault();
+  closeHeaderSections(true);
+ }
+});
 $('#workspace-home').onclick=()=>showPage('home');syncSidebar();
 document.querySelectorAll('[data-page],[data-open-page]').forEach(b=>b.onclick=()=>showPage(b.dataset.page||b.dataset.openPage));$('#close-trainer').onclick=closeTraining;$('#trainer').addEventListener('cancel',event=>{event.preventDefault();closeTraining()});$('#help').onclick=()=>$('#info').showModal();$('.close-info').onclick=()=>$('#info').close();$('#reset').onclick=()=>{state={learned:[],dates:[],practice:{}};save();showPage(currentPage);$('#reset-status').textContent='Прогресс ОГЭ сброшен.'};showPage(previewInitialPage());
 if(SlovoContent.preview){const lessonId=new URLSearchParams(location.search).get('lesson');const i=chapters.findIndex(c=>c.id===lessonId);if(i>=0){if(chapters[i].kind==='vocab')viewVocabulary(i);else start(i)}}
